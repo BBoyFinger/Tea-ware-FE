@@ -53,5 +53,6 @@
   },
   "devDependencies": {
     "tailwindcss": "^3.4.11"
-  }
+  }, 
+  "proxy": "https://tea-ceremony-be-zhiv.onrender.com/"
 }
