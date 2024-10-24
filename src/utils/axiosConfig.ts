@@ -3,7 +3,7 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 
 const axiosInstance = axios.create({
-  baseURL: "http://localhost:8080/api",
+  baseURL: "https://tea-ceremony-be-zhiv.onrender.com/api",
   headers: {
     "Content-Type": "application/json",
   },
