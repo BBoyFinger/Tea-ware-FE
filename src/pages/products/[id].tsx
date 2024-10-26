@@ -18,6 +18,8 @@ import {
 import RelatedProducts from "../../components/RelatedProduct";
 import Context from "../../context";
 import { addCart, viewProductCart } from "../../features/auth/authSlice";
+import LikeButton from "../../components/LikeButton";
+import FacebookPlugin from "../../components/LikeButton";
 
 const ProductDetailPage = () => {
   const context = useContext(Context);
@@ -38,11 +40,10 @@ const ProductDetailPage = () => {
     }
   }, [params.id]);
 
-
   const handleAddToCart = async (productId: string) => {
     await dispatch(addCart(productId));
     context?.fetchUserAddToCart();
-    await dispatch(viewProductCart())
+    await dispatch(viewProductCart());
   };
 
   const renderStars = (rating: any) => {
@@ -58,6 +59,8 @@ const ProductDetailPage = () => {
     }
     return stars;
   };
+
+  const pageUrl = "https://developers.facebook.com/docs/plugins/"; 
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -117,6 +120,9 @@ const ProductDetailPage = () => {
               className="w-[50%] px-2 py-1 border rounded-md"
             />
           </div>
+
+          <h1>Facebook Like và Share Plugin trong React</h1>
+          <FacebookPlugin url={pageUrl} />
 
           <div className="flex items-center gap-3">
             <button className="border-2 border-[#f05338] text-black min-w-[120px] hover:text-white py-1 px-3 rounded hover:bg-[#f04138] transition-colors duration-300">
@@ -178,7 +184,14 @@ const ProductDetailPage = () => {
           Write a Review
         </button>
       </div>
-
+      <div
+        className="fb-post"
+        data-href="https://www.facebook.com/20531316728/posts/10154009990506729/"
+        data-width="500"
+        data-show-text="true"
+      >
+        Hello
+      </div>
       {/* Related Products */}
       <RelatedProducts relatedProducts={productByCategory} />
     </div>

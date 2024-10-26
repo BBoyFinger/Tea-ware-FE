@@ -22,6 +22,7 @@ import { Navigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import BlogDetailsPage from "../pages/blog/[id]";
+import Checkout from "../pages/Checkout";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useSelector((state: RootState) => state.authReducer);
@@ -130,6 +131,10 @@ const router = createBrowserRouter([
       {
         path: "/contact",
         element: <ContactUs />,
+      },
+      {
+        path: "/checkout",
+        element: <Checkout />,
       },
     ],
   },
