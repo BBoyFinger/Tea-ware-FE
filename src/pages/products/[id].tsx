@@ -1,6 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
 import {
-  FaShoppingCart,
   FaFacebook,
   FaTwitter,
   FaPinterest,
@@ -18,15 +17,12 @@ import {
 import RelatedProducts from "../../components/RelatedProduct";
 import Context from "../../context";
 import { addCart, viewProductCart } from "../../features/auth/authSlice";
-import LikeButton from "../../components/LikeButton";
-import FacebookPlugin from "../../components/LikeButton";
 
 const ProductDetailPage = () => {
   const context = useContext(Context);
 
   const [currentImage, setCurrentImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
-  const [showMiniCart, setShowMiniCart] = useState(false);
   const dispatch: AppDispatch = useDispatch();
   const productState = useSelector((state: RootState) => state.productReducer);
   const { product, productByCategory } = productState;
@@ -38,7 +34,7 @@ const ProductDetailPage = () => {
     if (params.id) {
       dispatch(getProductById(params.id));
     }
-  }, [params.id]);
+  }, [params.id, dispatch]);
 
   const handleAddToCart = async (productId: string) => {
     await dispatch(addCart(productId));
@@ -60,7 +56,7 @@ const ProductDetailPage = () => {
     return stars;
   };
 
-  const pageUrl = "https://developers.facebook.com/docs/plugins/"; 
+  const pageUrl = "https://developers.facebook.com/docs/plugins/";
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -120,9 +116,6 @@ const ProductDetailPage = () => {
               className="w-[50%] px-2 py-1 border rounded-md"
             />
           </div>
-
-          <h1>Facebook Like và Share Plugin trong React</h1>
-          <FacebookPlugin url={pageUrl} />
 
           <div className="flex items-center gap-3">
             <button className="border-2 border-[#f05338] text-black min-w-[120px] hover:text-white py-1 px-3 rounded hover:bg-[#f04138] transition-colors duration-300">

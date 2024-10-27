@@ -2,6 +2,13 @@ import { createAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import { User } from "../../types/user.types";
 import authService from "./authService";
 
+interface ProductCartItem {
+  quantity: number;
+  productId: {
+    price: number;
+  };
+}
+
 interface AuthState {
   user: User | null;
   searchField: {
@@ -12,7 +19,7 @@ interface AuthState {
   users: User[];
   isLoading: boolean;
   userAddToCart: any;
-  productsCart: any;
+  productsCart: ProductCartItem[];
   updatedUser: any;
   addToCart: any;
   deleteUser: any;
@@ -40,7 +47,7 @@ const initialState: AuthState = {
   deletedCartProduct: null,
   addToCart: null,
   userAddToCart: null,
-  productsCart: null,
+  productsCart: [],
   message: "",
 };
 

@@ -8,17 +8,18 @@ import {
   viewProductCart,
 } from "../features/auth/authSlice";
 import Context from "../context";
+import { Link } from "react-router-dom";
 
 const CartPage = () => {
   const dispatch: AppDispatch = useDispatch();
 
   const authState = useSelector((state: RootState) => state.authReducer);
   const { productsCart } = authState;
-  const [promoCode, setPromoCode] = useState("");
   const [discount, setDiscount] = useState(0);
   const [totalAmount, setTotalAmount] = useState<number>(0);
 
   const context = useContext(Context);
+
   const increaseQuantity = async (id: any, currentQuantity: number) => {
     const newQuantity = currentQuantity + 1;
     await dispatch(updateCartProduct({ productId: id, newQuantity }));
@@ -52,15 +53,6 @@ const CartPage = () => {
       await dispatch(deleteCartProduct(id));
       await dispatch(viewProductCart());
       await context?.fetchUserAddToCart();
-    }
-  };
-
-  const applyPromoCode = () => {
-    // Simple promo code logic
-    if (promoCode.toLowerCase() === "discount10") {
-      setDiscount(10);
-    } else {
-      setDiscount(0);
     }
   };
 
@@ -139,12 +131,12 @@ const CartPage = () => {
               </div>
             )}
 
-            <button
+            <Link
+              to="/checkout"
               className="w-full bg-green-500 text-white py-3 rounded-lg mt-6 hover:bg-green-600 transition-colors flex items-center justify-center"
-              onClick={() => alert("Proceeding to checkout")}
             >
               <FaShoppingCart className="mr-2" /> Proceed to Checkout
-            </button>
+            </Link>
           </div>
         </div>
       </div>
