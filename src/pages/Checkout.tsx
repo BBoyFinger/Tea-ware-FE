@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import PaymentButton from "../components/PaymentButton";
 
 const shippingSchema = yup.object({
   firstName: yup.string().required("First Name is Required!"),
@@ -45,7 +46,7 @@ const Checkout = (props: Props) => {
       pinCode: "",
     },
     validationSchema: shippingSchema,
-    onSubmit(values, formikHelpers) {
+    onSubmit(values: any) {
       alert(JSON.stringify(values));
     },
   });
@@ -61,6 +62,7 @@ const Checkout = (props: Props) => {
           <p className="user-details text-lg text-gray-600 mt-1">
             Nguyen Van Hiep
           </p>
+          <PaymentButton />
           <form
             onSubmit={validateForm.handleSubmit}
             action=""
@@ -81,7 +83,9 @@ const Checkout = (props: Props) => {
                 <option value="USA">USA</option>
               </select>
               <div className="text-red-500 ms-1 my-1">
-                {validateForm.touched.country && validateForm.errors.country}
+                {validateForm.touched.country &&
+                  typeof validateForm.errors.country === "string" &&
+                  validateForm.errors.country}
               </div>
             </div>
 
@@ -99,6 +103,7 @@ const Checkout = (props: Props) => {
                 />
                 <div className="text-red-500 ms-1 my-1">
                   {validateForm.touched.firstName &&
+                    typeof validateForm.errors.firstName === "string" &&
                     validateForm.errors.firstName}
                 </div>
               </div>
@@ -114,6 +119,7 @@ const Checkout = (props: Props) => {
                 />
                 <div className="text-red-500 ms-1 my-1">
                   {validateForm.touched.lastName &&
+                    typeof validateForm.errors.lastName === "string" &&
                     validateForm.errors.lastName}
                 </div>
               </div>
@@ -131,7 +137,9 @@ const Checkout = (props: Props) => {
                 value={validateForm.values.address}
               />
               <div className="text-red-500 ms-1 my-1">
-                {validateForm.touched.address && validateForm.errors.address}
+                {validateForm.touched.address &&
+                  typeof validateForm.errors.address === "string" &&
+                  validateForm.errors.address}
               </div>
             </div>
 
@@ -160,7 +168,9 @@ const Checkout = (props: Props) => {
                   value={validateForm.values.city}
                 />
                 <div className="text-red-500 ms-1 my-1">
-                  {validateForm.touched.city && validateForm.errors.city}
+                  {validateForm.touched.city &&
+                    typeof validateForm.errors.city === "string" &&
+                    validateForm.errors.city}
                 </div>
               </div>
 
@@ -175,7 +185,9 @@ const Checkout = (props: Props) => {
                   value={validateForm.values.pinCode}
                 />
                 <div className="text-red-500 ms-1 my-1">
-                  {validateForm.touched.pinCode && validateForm.errors.pinCode}
+                  {validateForm.touched.pinCode &&
+                    typeof validateForm.errors.pinCode === "string" &&
+                    validateForm.errors.pinCode}
                 </div>
               </div>
             </div>
@@ -197,6 +209,8 @@ const Checkout = (props: Props) => {
                 >
                   Place Order
                 </button>
+
+              
               </div>
             </div>
           </form>
