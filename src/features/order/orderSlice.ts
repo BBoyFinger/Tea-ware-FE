@@ -26,7 +26,7 @@ const initialState: IOrderState = {
   message: "",
 };
 
-export const getCategories = createAsyncThunk("orders", async (_, thunkApi) => {
+export const getOrders = createAsyncThunk("orders", async (_, thunkApi) => {
   try {
     return await orderServices.getOrders();
   } catch (error) {
@@ -73,16 +73,16 @@ const orderSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(getCategories.pending, (state, action) => {
+      .addCase(getOrders.pending, (state, action) => {
         state.isLoading = true;
       })
-      .addCase(getCategories.fulfilled, (state, action) => {
+      .addCase(getOrders.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.isError = false;
         state.orders = action.payload;
       })
-      .addCase(getCategories.rejected, (state, action) => {
+      .addCase(getOrders.rejected, (state, action) => {
         state.isSuccess = false;
         state.isError = true;
         state.message = action.error.message as string;

@@ -23,35 +23,10 @@ const OrderManagement = (props: Props) => {
   };
 
   const [itemsPerPage, setitemsPerPage] = useState<number>(0);
-  const [orders, setOrders] = useState([
-    {
-      id: 1,
-      orderNumber: "ORD001",
-      customerName: "John Doe",
-      status: "Pending",
-      total: 150.0,
-      date: "2023-06-01",
-    },
-    {
-      id: 2,
-      orderNumber: "ORD002",
-      customerName: "Jane Smith",
-      status: "Shipped",
-      total: 250.0,
-      date: "2023-06-02",
-    },
-    {
-      id: 3,
-      orderNumber: "ORD003",
-      customerName: "Bob Johnson",
-      status: "Delivered",
-      total: 100.0,
-      date: "2023-06-03",
-    },
-  ]);
+
   const [sortBy, setSortBy] = useState<string>("");
   const orderState = useSelector((state: RootState) => state.orderReducer);
-  const { isLoading } = orderState;
+  const { isLoading, orders } = orderState;
 
   const columns = [
     { key: "orederNumber", label: "Order Number", sortable: true },
@@ -66,25 +41,15 @@ const OrderManagement = (props: Props) => {
     setSearchField({ ...searchField, [value]: name });
   };
 
-  function openModal(arg0: null): void {
-    throw new Error("Function not implemented.");
-  }
+  function openModal(arg0: null): void {}
 
-  function handleSelectOrder(id: string): void {
-    throw new Error("Function not implemented.");
-  }
+  function handleSelectOrder(id: string): void {}
 
-  function handleSort(key: string): void {
-    throw new Error("Function not implemented.");
-  }
+  function handleSort(key: string): void {}
 
-  function handleDeleteOrder(id: string[]): void {
-    throw new Error("Function not implemented.");
-  }
+  function handleDeleteOrder(id: string[]): void {}
 
-  function handleDeleteOrderSelected(): void {
-    throw new Error("Function not implemented.");
-  }
+  function handleDeleteOrderSelected(): void {}
   const [statusFilter, setStatusFilter] = useState("all");
 
   const handleStatusFilter = (e: any) => {
@@ -171,12 +136,6 @@ const OrderManagement = (props: Props) => {
       <div className="flex items-center justify-end mb-2 gap-4">
         <button className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center">
           <BsSearch className="mr-2" /> Search
-        </button>
-        <button
-          onClick={() => openModal(null)}
-          className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-        >
-          <FiPlus className="mr-2" /> Add Product
         </button>
       </div>
       {/* Table */}

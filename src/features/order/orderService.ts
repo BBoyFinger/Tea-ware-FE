@@ -2,7 +2,7 @@ import { IOrder } from "../../types/order.type";
 import axiosInstance from "../../utils/axiosConfig";
 
 const getOrders = async () => {
-  const response = await axiosInstance.get("/order");
+  const response = await axiosInstance.get("/orders");
   return response.data.data;
 };
 
