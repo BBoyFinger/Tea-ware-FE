@@ -29,6 +29,8 @@ const ShoppingCart = ({
   const [isOpen, setIsOpen] = useState(false);
   const [totalAmount, setTotalAmount] = useState<number>(0);
 
+  
+
   useEffect(() => {
     dispatch(viewProductCart());
     context?.fetchUserAddToCart();

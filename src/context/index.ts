@@ -3,7 +3,7 @@ import { createContext } from "react";
 interface ContextType {
   // Define your context value type here
   fetchUserDetails: () => Promise<void>;
-  userAddToCart: { count: number };
+  userAddToCartCount: { count: number };
   fetchUserAddToCart: () => Promise<void>
 }
 

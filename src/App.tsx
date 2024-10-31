@@ -9,7 +9,7 @@ import Context from "./context";
 import { useDispatch, useSelector } from "react-redux";
 import {
   setUserDetails,
-  userAddCart,
+  userAddCartCountNumber,
   viewProductCart,
 } from "./features/auth/authSlice";
 import { AppDispatch, RootState } from "./store/store";
@@ -17,12 +17,11 @@ import { AppDispatch, RootState } from "./store/store";
 function App() {
   const dispatch: AppDispatch = useDispatch();
   const authState = useSelector((state: RootState) => state.authReducer);
-  const { userAddToCart } = authState;
+  const { userAddToCartCount, user } = authState;
 
   const fetchUserDetails = async (): Promise<void> => {
     try {
       const response = await axiosInstance.get("/user-detail");
-      console.log("Response from user-detail:", response.data); // Log phản hồi
 
       if (response.data.success) {
         dispatch(setUserDetails(response.data.data));
@@ -34,7 +33,7 @@ function App() {
 
   const fetchUserAddToCart = async (): Promise<void> => {
     try {
-      await dispatch(userAddCart()); // Dispatch the thunk
+      await dispatch(userAddCartCountNumber()); // Dispatch the thunk
     } catch (error) {
       console.error("Error adding to cart:", error);
     }
@@ -54,10 +53,18 @@ function App() {
     fetchViewCart();
   }, [dispatch]);
 
+  useEffect(() => {
+    if (authState?.user) {
+      // Kiểm tra nếu đã có thông tin người dùng
+      fetchUserAddToCart();
+      fetchViewCart();
+    }
+  }, [authState.user, dispatch]);
+
   return (
     <>
       <Context.Provider
-        value={{ fetchUserDetails, userAddToCart, fetchUserAddToCart }}
+        value={{ fetchUserDetails, userAddToCartCount, fetchUserAddToCart }}
       >
         <ToastContainer />
         <Header />

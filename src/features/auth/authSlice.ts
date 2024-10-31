@@ -18,7 +18,9 @@ interface AuthState {
   };
   users: User[];
   isLoading: boolean;
-  userAddToCart: any;
+  userAddToCartCount: {
+    count: number;
+  };
   productsCart: ProductCartItem[];
   updatedUser: any;
   addToCart: any;
@@ -46,7 +48,9 @@ const initialState: AuthState = {
   updateCartProduct: null,
   deletedCartProduct: null,
   addToCart: null,
-  userAddToCart: null,
+  userAddToCartCount: {
+    count: 0,
+  },
   productsCart: [],
   message: "",
 };
@@ -83,7 +87,7 @@ export const addCart = createAsyncThunk(
   }
 );
 
-export const userAddCart = createAsyncThunk(
+export const userAddCartCountNumber = createAsyncThunk(
   "userAddToCart",
   async (_, thunkApi) => {
     try {
@@ -225,16 +229,16 @@ export const authSlice = createSlice({
         state.isError = true;
         state.message = action.error.message || "";
       })
-      .addCase(userAddCart.pending, (state, action) => {
+      .addCase(userAddCartCountNumber.pending, (state, action) => {
         state.isLoading = true;
       })
-      .addCase(userAddCart.fulfilled, (state, action) => {
+      .addCase(userAddCartCountNumber.fulfilled, (state, action) => {
         state.isLoading = false;
         state.isSuccess = true;
         state.isError = false;
-        state.userAddToCart = action.payload;
+        state.userAddToCartCount = action.payload;
       })
-      .addCase(userAddCart.rejected, (state, action) => {
+      .addCase(userAddCartCountNumber.rejected, (state, action) => {
         state.isLoading = false;
         state.isSuccess = false;
         state.isError = true;

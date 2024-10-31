@@ -42,6 +42,7 @@ const Header = (props: Props) => {
 
   useEffect(() => {
     dispatch(viewProductCart());
+    context?.fetchUserAddToCart();
   }, [dispatch]);
 
   return (
@@ -63,7 +64,7 @@ const Header = (props: Props) => {
 
               <div className=" text-2xl relative cursor-pointer">
                 <Cart
-                  count={context?.userAddToCart?.count}
+                  count={context?.userAddToCartCount?.count}
                   userId={user?._id}
                   products={productsCart}
                   viewProductCart={viewProductCart}
@@ -143,7 +144,7 @@ const Header = (props: Props) => {
                 {/* Cart*/}
                 <div className=" text-2xl relative cursor-pointer">
                   <Cart
-                    count={context?.userAddToCart?.count}
+                    count={context?.userAddToCartCount.count}
                     userId={user?._id}
                     products={productsCart}
                     viewProductCart={viewProductCart}
