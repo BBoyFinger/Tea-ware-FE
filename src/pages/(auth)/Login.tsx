@@ -35,7 +35,6 @@ const Login = () => {
     e.preventDefault();
     try {
       const response = await axiosInstance.post("/signin", data);
-      console.log(response);
      
       if (response?.data.success) {
         toast.success(response?.data.message);

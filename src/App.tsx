@@ -22,6 +22,7 @@ function App() {
   const fetchUserDetails = async (): Promise<void> => {
     try {
       const response = await axiosInstance.get("/user-detail");
+      console.log("Response from user-detail:", response.data); // Log phản hồi
 
       if (response.data.success) {
         dispatch(setUserDetails(response.data.data));
