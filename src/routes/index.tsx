@@ -102,8 +102,8 @@ const router = createBrowserRouter([
             element: <OrderManagement />,
           },
           {
-            path: "settings",
-            element: <div>Settings content here</div>,
+            path: "changePassword",
+            element: <ForgotPassword />,
           },
         ],
       },
@@ -135,6 +135,10 @@ const router = createBrowserRouter([
       {
         path: "/checkout",
         element: <Checkout />,
+      },
+      {
+        path: "/changePassword",
+        element: <ForgotPassword />,
       },
     ],
   },

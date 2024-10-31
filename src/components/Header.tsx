@@ -121,17 +121,25 @@ const Header = (props: Props) => {
                           {user?.role === ROLE.ADMIN ? (
                             <Link
                               to={"/admin-panel"}
-                              className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
+                              className="block px-4 py-2 hover:bg-slate-300 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                             >
                               Admin Panel
                             </Link>
                           ) : user?.role === ROLE.CUSTOMER ? (
-                            <Link
-                              to={"/profile"}
-                              className="block px-4 py-2 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
-                            >
-                              Profile
-                            </Link>
+                            <>
+                              <Link
+                                to={"/profile"}
+                                className="block px-4 py-2 hover:bg-slate-300 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
+                              >
+                                Profile
+                              </Link>
+                              <Link
+                                to={"/changePassword"}
+                                className="block px-4 py-2 hover:bg-slate-300 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
+                              >
+                                Change Password
+                              </Link>
+                            </>
                           ) : (
                             ""
                           )}
@@ -154,7 +162,7 @@ const Header = (props: Props) => {
                   {user?._id ? (
                     <button
                       onClick={handleLogout}
-                      className="px-4 py-2 rounded-full font-bold bg-[#bd3030] hover:opacity-[0.9] text-white "
+                      className="px-4 py-2 hover:bg-slate-300 rounded-full font-bold bg-[#bd3030] hover:opacity-[0.9] text-white "
                     >
                       {" "}
                       Logout{" "}
@@ -162,7 +170,7 @@ const Header = (props: Props) => {
                   ) : (
                     <Link
                       to={"/login"}
-                      className="px-4 py-2 rounded-full font-bold bg-[#bd3030] hover:opacity-[0.9] text-white "
+                      className="px-4 py-2 hover:bg-slate-300 rounded-full font-bold bg-[#bd3030] hover:opacity-[0.9] text-white "
                     >
                       Login
                     </Link>
