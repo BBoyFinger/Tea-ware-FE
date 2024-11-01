@@ -23,6 +23,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import BlogDetailsPage from "../pages/blog/[id]";
 import Checkout from "../pages/Checkout";
+import Profile from "../pages/admin/Profile";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useSelector((state: RootState) => state.authReducer);
@@ -104,6 +105,10 @@ const router = createBrowserRouter([
           {
             path: "changePassword",
             element: <ForgotPassword />,
+          },
+          {
+            path: "profile",
+            element: <Profile />,
           },
         ],
       },

@@ -5,22 +5,43 @@ import {
   FiUsers,
   FiDatabase,
   FiSettings,
+  FiCamera,
+  FiEdit2,
 } from "react-icons/fi";
 import { Outlet } from "react-router-dom"; // Import Outlet
 import { BiCategoryAlt } from "react-icons/bi";
 import { FiShoppingCart } from "react-icons/fi";
 
-import Logo from "../../assets/logo.svg";
-
 import { Link, useLocation } from "react-router-dom";
 import { RiBloggerLine } from "react-icons/ri";
+import { useSelector } from "react-redux";
+import { RootState } from "../../store/store";
 
 const AdminPanel = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const toggleSidebar = () => setIsSidebarOpen(!isSidebarOpen);
   const location = useLocation();
 
+  const userDetail = useSelector((state: RootState) => state.authReducer.user);
+
+  console.log(userDetail);
+
+  const [profileData, setProfileData] = useState({
+    name: "John Doe",
+    email: "john.doe@example.com",
+    address: "123 Main St, City, Country",
+    phone: "+1 234 567 890",
+    image:
+      "images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3",
+  });
   const isActiveTab = (path: any) => location.pathname === path;
+
+  const handleProfileUpdate = (field: any, value: any) => {
+    setProfileData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
 
   return (
     <div className="flex h-screen">
@@ -30,12 +51,15 @@ const AdminPanel = () => {
         }`}
       >
         <nav>
-          <div className="flex items-center justify-center m-4">
-            <img
-              src={Logo}
-              alt="logo"
-              className="w-20 h-20 bg-white rounded-full"
-            />
+          <div className="flex flex-col items-center mb-6">
+            <div className="relative">
+              <img
+                src={userDetail?.pictureImg}
+                alt="Profile"
+                className="w-32 h-32 rounded-full object-cover"
+              />
+            </div>
+            <h2 className="mt-4 text-xl font-semibold">{userDetail?.name}</h2>
           </div>
           <ul className="space-y-2">
             <li>
@@ -116,6 +140,19 @@ const AdminPanel = () => {
               >
                 <FiShoppingCart />
                 <span>Order</span>
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/admin-panel/profile" // Cập nhật đường dẫn
+                className={`flex items-center space-x-2 w-full p-2 rounded-md ${
+                  isActiveTab("/admin-panel/profile")
+                    ? "bg-gray-700"
+                    : "hover:bg-gray-700"
+                }`}
+              >
+                <FiEdit2 />
+                <span>Profile</span>
               </Link>
             </li>
             <li>
