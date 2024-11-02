@@ -24,6 +24,7 @@ import { RootState } from "../store/store";
 import BlogDetailsPage from "../pages/blog/[id]";
 import Checkout from "../pages/Checkout";
 import Profile from "../pages/admin/Profile";
+import Settings from "../pages/admin/Setting";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useSelector((state: RootState) => state.authReducer);
@@ -103,8 +104,8 @@ const router = createBrowserRouter([
             element: <OrderManagement />,
           },
           {
-            path: "changePassword",
-            element: <ForgotPassword />,
+            path: "setting",
+            element: <Settings />,
           },
           {
             path: "profile",

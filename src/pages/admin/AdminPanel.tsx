@@ -157,15 +157,15 @@ const AdminPanel = () => {
             </li>
             <li>
               <Link
-                to="/admin-panel/changePassword" // Cập nhật đường dẫn
+                to="/admin-panel/setting" // Cập nhật đường dẫn
                 className={`flex items-center space-x-2 w-full p-2 rounded-md ${
-                  isActiveTab("/admin-panel/changePassword")
+                  isActiveTab("/admin-panel/setting")
                     ? "bg-gray-700"
                     : "hover:bg-gray-700"
                 }`}
               >
                 <FiSettings />
-                <span>Change Password</span>
+                <span>Setting </span>
               </Link>
             </li>
           </ul>

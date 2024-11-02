@@ -100,14 +100,6 @@ const Login = () => {
                 >
                   Password
                 </label>
-                <div className="text-sm">
-                  <Link
-                    to="/forgot-password"
-                    className="font-semibold text-[#bd3030] hover:opacity-[0.9]"
-                  >
-                    Forgot password?
-                  </Link>
-                </div>
               </div>
               <div className="mt-1 flex bg-slate-100 p-2">
                 <input
