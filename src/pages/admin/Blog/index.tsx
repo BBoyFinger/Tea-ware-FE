@@ -1,6 +1,6 @@
-import React, { ChangeEvent, useEffect, useRef, useState } from "react";
+/* eslint-disable jsx-a11y/img-redundant-alt */
+import React, { useEffect, useState } from "react";
 import Table from "../../../components/ui/Table";
-
 import { IBlog } from "../../../types/blog.type";
 import { FiPlus, FiSearch } from "react-icons/fi";
 import { Modal } from "../../../components/ui/Modal";
@@ -18,53 +18,64 @@ import {
 import { toast } from "react-toastify";
 import ReactQuill from "react-quill";
 import "react-quill/dist/quill.snow.css";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { BsSearch } from "react-icons/bs";
 
 const BlogManagement = () => {
   const dispatch: AppDispatch = useDispatch();
-  // Define custom modules for the toolbar
   const [searchQuery, setSearchQuery] = useState("");
   const blogState = useSelector((state: RootState) => state.blogReducer);
   const { blogs, searchBlogs } = blogState;
-  const [content, setContent] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState<string[]>([]);
-  const [blogInfo, setBlogInfo] = useState<IBlog | null>({
-    _id: "",
-    title: "",
-    content: "",
-    images: [
-      {
-        url: "",
-        title: "",
-      },
-    ],
-  });
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [UploadImageInput, setUploadImageInput] = useState("");
 
-  const handleInputChange = (e: any) => {
-    const { name, value } = e.target;
-    setBlogInfo({ ...blogInfo, [name]: value });
-  };
+  const formik = useFormik<IBlog>({
+    initialValues: {
+      _id: "",
+      title: "",
+      content: "",
+      images: [],
+    },
+    validationSchema: Yup.object({
+      title: Yup.string().required("Title is required"),
+      content: Yup.string().required("Content is required"),
+    }),
+    onSubmit: async (values) => {
+      if (values._id) {
+        await dispatch(updateBlog(values));
+        toast.success("Update blog successfully!");
+      } else {
+        await dispatch(createBlog(values));
+        toast.success("Create blog successfully!");
+      }
+      setIsModalOpen(false);
+      await dispatch(getBlog());
+    },
+  });
+
+  useEffect(() => {
+    dispatch(getBlog()); // Initial fetch of blogs
+  }, [dispatch]);
 
   useEffect(() => {
     dispatch(SearchBlog(searchQuery));
-  }, [searchQuery]);
+  }, [searchQuery, dispatch]);
 
   const handleDelete = async (id: string[]) => {
-    // Logic xóa
-    if (window.confirm("Are u sure delete this blog!")) {
+    if (window.confirm("Are you sure you want to delete this blog?")) {
       await dispatch(deleteBlog(id));
-      await dispatch(getBlog());
       toast.success("Delete blog successfully");
+      await dispatch(getBlog());
     }
   };
 
   const handleSelectItem = (id: string) => {
-    if (selectedBlog.includes(id)) {
-      setSelectedBlog(selectedBlog.filter((blogId) => blogId !== id));
-    } else {
-      setSelectedBlog([...selectedBlog, id]);
-    }
+    setSelectedBlog((prev) =>
+      prev.includes(id) ? prev.filter((blogId) => blogId !== id) : [...prev, id]
+    );
   };
 
   const closeModal = () => {
@@ -72,16 +83,21 @@ const BlogManagement = () => {
   };
 
   const openModal = (blog: IBlog | null = null) => {
-    console.log(blog?._id);
-    setBlogInfo(blog);
-    if (blog?.content) {
-      setContent(blog?.content);
+    if (blog) {
+      formik.setValues(blog);
+    } else {
+      formik.resetForm();
     }
     setIsModalOpen(true);
   };
 
-  const handleSearch = (query: string) => {
-    setSearchQuery(query);
+  const handleSearch = async () => {
+    // const payload = {
+    //   blog: searchBlogs.,
+    //   category: searchField?.category,
+    //   availability: searchField.availability,
+    // };
+    // await dispatch(getProducts(payload));
   };
 
   const columns = [
@@ -95,48 +111,23 @@ const BlogManagement = () => {
     if (window.confirm("Are you sure you want to delete the selected blog?")) {
       await dispatch(deleteBlog(selectedBlog));
       toast.success("Delete Blog successfully!");
-      dispatch(getBlog());
+      await dispatch(getBlog());
     }
   };
 
-  const handleImageUpload = async (e: any) => {
-    const file = e.target.files[0];
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
 
-    setUploadImageInput(file?.name);
+    setUploadImageInput(file.name);
 
     const uploadImageFormCloudinary = await uploadImageBlog(file);
 
-    setBlogInfo((prev: any) => {
-      return {
-        ...prev,
-        images: [{ url: uploadImageFormCloudinary?.url, title: file?.name }],
-      };
-    });
+    formik.setFieldValue("images", [
+      { url: uploadImageFormCloudinary.url, title: file.name },
+    ]);
   };
 
-  const handleSubmit = async () => {
-    if (blogInfo?._id) {
-      const payload = {
-        _id: blogInfo?._id,
-        title: blogInfo?.title,
-        content: content,
-        images: blogInfo?.images,
-      };
-      await dispatch(updateBlog(payload));
-      toast.success("Update blog successfully!");
-      setIsModalOpen(false);
-    } else {
-      const payload = {
-        title: blogInfo?.title,
-        content: content,
-        images: blogInfo?.images,
-      };
-      toast.success("Create blog successfully!");
-      await dispatch(createBlog(payload));
-      setIsModalOpen(false);
-    }
-    await dispatch(getBlog());
-  };
   return (
     <div className="container mx-auto p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">
@@ -149,16 +140,24 @@ const BlogManagement = () => {
             type="text"
             placeholder="Search Blogs"
             className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            onChange={(e) => handleSearch(e.target.value)}
+            // onChange={(e) => handleSearch(e.target.value)}
           />
           <FiSearch className="absolute left-3 top-3 text-gray-400" />
         </div>
-        <button
-          onClick={() => openModal(null)}
-          className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
-        >
-          <FiPlus className="mr-2" /> Add Blog
-        </button>
+        <div className="flex gap-4">
+          <button
+            className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+            onClick={handleSearch}
+          >
+            <BsSearch className="mr-2" /> Search
+          </button>
+          <button
+            onClick={() => openModal(null)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+          >
+            <FiPlus className="mr-2" /> Add Blog
+          </button>
+        </div>
       </div>
 
       <Table
@@ -166,7 +165,7 @@ const BlogManagement = () => {
         onSelectItem={handleSelectItem}
         onDeleteSelected={handleDeletedItem}
         columns={columns}
-        data={searchBlogs}
+        data={blogs}
         sortBy={"sortBy"}
         sortOrder={"asc"}
         itemsPerPage={20}
@@ -175,20 +174,18 @@ const BlogManagement = () => {
         onDelete={handleDelete}
       />
 
-      <div>
-        <Modal
-          isOpen={isModalOpen}
-          closeModal={closeModal}
-          title={`${blogInfo?._id === undefined ? "Create Blog" : "Edit Blog"}`}
-          onSubmit={handleSubmit}
-          submitText={`${
-            blogInfo?._id === undefined ? "Create Blog" : "Edit Blog"
-          }`}
-          cancelText="Cancel"
-          className={
-            "inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl overflow-y-auto max-h-[90vh]"
-          }
-        >
+      <Modal
+        isOpen={isModalOpen}
+        closeModal={closeModal}
+        title={`${formik.values._id ? "Edit Blog" : "Create Blog"}`}
+        onSubmit={formik.handleSubmit}
+        submitText={`${formik.values._id ? "Edit Blog" : "Create Blog"}`}
+        cancelText="Cancel"
+        className={
+          "inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl overflow-y-auto max-h-[90vh]"
+        }
+      >
+        <form onSubmit={formik.handleSubmit}>
           <div>
             <label
               htmlFor="title"
@@ -200,11 +197,15 @@ const BlogManagement = () => {
               type="text"
               id="title"
               name="title"
-              value={blogInfo?.title}
-              onChange={handleInputChange}
+              value={formik.values.title}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
               className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
               placeholder="Enter blog title"
             />
+            {formik.touched.title && formik.errors.title ? (
+              <div className="text-red-500 text-sm">{formik.errors.title}</div>
+            ) : null}
           </div>
           <div>
             <label
@@ -216,8 +217,8 @@ const BlogManagement = () => {
             <ReactQuill
               theme="snow"
               id="content"
-              value={content}
-              onChange={setContent}
+              value={formik.values.content}
+              onChange={(value) => formik.setFieldValue("content", value)}
               modules={{
                 toolbar: [
                   [{ header: "1" }, { header: "2" }, { font: [] }],
@@ -239,6 +240,11 @@ const BlogManagement = () => {
                 "image",
               ]}
             />
+            {formik.touched.content && formik.errors.content ? (
+              <div className="text-red-500 text-sm">
+                {formik.errors.content}
+              </div>
+            ) : null}
           </div>
 
           <div className="col-span-full">
@@ -258,7 +264,6 @@ const BlogManagement = () => {
                       id="images"
                       name="images"
                       type="file"
-                      multiple
                       onChange={handleImageUpload}
                       className="sr-only"
                     />
@@ -272,22 +277,20 @@ const BlogManagement = () => {
             </div>
 
             <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4">
-              {blogInfo?.images?.map((image: any, index: any) => (
+              {formik.values.images?.map((image, index) => (
                 <div key={index} className="relative">
                   <img
-                    src={image?.url}
-                    alt={`Uploaded image ${image?.title}`}
+                    src={image.url}
+                    alt={`Uploaded image ${image.title}`}
                     className="h-24 w-full object-cover rounded-md"
                   />
                   <button
                     type="button"
                     onClick={() =>
-                      setBlogInfo((prev: any) => ({
-                        ...prev,
-                        images: prev.images.filter(
-                          (_: any, i: any) => i !== index
-                        ),
-                      }))
+                      formik.setFieldValue(
+                        "images",
+                        formik.values.images?.filter((_, i) => i !== index)
+                      )
                     }
                     className="absolute top-0 right-0 -mt-2 -mr-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 focus:outline-none"
                   >
@@ -297,8 +300,8 @@ const BlogManagement = () => {
               ))}
             </div>
           </div>
-        </Modal>
-      </div>
+        </form>
+      </Modal>
     </div>
   );
 };

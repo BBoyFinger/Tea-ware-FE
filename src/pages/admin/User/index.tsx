@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store/store";
 import { ImSpinner3 } from "react-icons/im";
-
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import {
   getAllUser,
   deleteUsers,
@@ -14,7 +15,6 @@ import { toast } from "react-toastify";
 import { Modal } from "../../../components/ui/Modal";
 import { Account, ROLE } from "../../../utils/User";
 import Table from "../../../components/ui/Table";
-
 import { BsSearch } from "react-icons/bs";
 
 type Props = {};
@@ -24,38 +24,56 @@ const UserManagement = (props: Props) => {
   const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [sortBy, setSortBy] = useState("name");
-  const [userRole, setUserRole] = useState("ADMIN");
-  const [status, setStatus] = useState("Active");
-
-  const [userDetail, setUserDetail] = useState({
-    email: "",
-    name: "",
-    role: "",
-    userId: "",
-    status: "",
-  });
 
   const dispatch: AppDispatch = useDispatch();
-  // Selector from redux
   const userState = useSelector((state: RootState) => state.authReducer);
   const { users, isLoading, searchField } = userState;
+
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      name: "",
+      role: "ADMIN",
+      userId: "",
+      status: "Active",
+    },
+    validationSchema: Yup.object({
+      role: Yup.string().required("Role is required"),
+      status: Yup.string().required("Status is required"),
+    }),
+    onSubmit: async (values) => {
+      try {
+        await dispatch(
+          updateUser({
+            userId: values.userId,
+            role: values.role,
+            status: values.status,
+          })
+        ).unwrap();
+        toast.success("Updated user role successfully!");
+        setIsEditDialogOpen(false);
+        dispatch(getAllUser());
+      } catch (error) {
+        toast.error("Failed to update user role!");
+      }
+    },
+  });
+
+  useEffect(() => {
+    dispatch(getAllUser());
+  }, [dispatch]);
 
   const handleInputChange = (e: any) => {
     const { name, value } = e.target;
     dispatch(setSearchField({ [name]: value }));
   };
 
-  useEffect(() => {
-    dispatch(getAllUser());
-    // dispatch(resetState());
-  }, [dispatch]);
-
   const handleSelectUser = (userId: string) => {
-    if (selectedUsers.includes(userId)) {
-      setSelectedUsers(selectedUsers.filter((id) => id !== userId));
-    } else {
-      setSelectedUsers([...selectedUsers, userId]);
-    }
+    setSelectedUsers((prev) =>
+      prev.includes(userId)
+        ? prev.filter((id) => id !== userId)
+        : [...prev, userId]
+    );
   };
 
   const handleSearch = () => {
@@ -63,41 +81,19 @@ const UserManagement = (props: Props) => {
   };
 
   const handleEditUser = (user: any) => {
-    setUserDetail({
+    formik.setValues({
       email: user.email,
       name: user.name,
       role: user.role,
-      userId: user._id, // Lưu ID của người dùng
+      userId: user._id,
       status: user.status,
     });
-    setUserRole(user.role);
-    setStatus(user.status);
-    setIsEditDialogOpen(true); // Mở modal
+    setIsEditDialogOpen(true);
   };
 
-  const handleUpdateRole = async () => {
-    setIsEditDialogOpen(true); // Mở modal
-    try {
-      // Gọi cập nhật vai trò và chờ hoàn tất
-      await dispatch(
-        updateUser({
-          userId: userDetail.userId,
-          role: userRole,
-          status: status,
-        })
-      ).unwrap();
-      toast.success("Updated user role successfully!"); // Thông báo thành công
-    } catch (error) {
-      toast.error("Failed to update user role!"); // Thông báo lỗi nếu có
-    } finally {
-      setIsEditDialogOpen(false); // Đóng modal
-      dispatch(getAllUser()); // Lấy lại danh sách người dùng để cập nhật UI
-    }
-  };
-
-  const handleDeleteUser = async (id: any) => {
-    if (window.confirm("Are u sure you want to delete this user?")) {
-      await dispatch(deleteUsers(id));
+  const handleDeleteUser = async (ids: string[]) => {
+    if (window.confirm("Are you sure you want to delete this user?")) {
+      await dispatch(deleteUsers(ids));
       toast.success("Delete User successfully!");
       dispatch(getAllUser());
     }
@@ -122,7 +118,7 @@ const UserManagement = (props: Props) => {
 
   const handleSort = (column: string) => {
     if (sortBy === column) {
-      setSortOrder(sortOrder === "asc" ? "desc" : ("asc" as "asc" | "desc")); // ép kiểu ở đây
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
     } else {
       setSortBy(column);
       setSortOrder("asc");
@@ -133,7 +129,6 @@ const UserManagement = (props: Props) => {
     <>
       <div className="container mx-auto px-4 py-8">
         <h3 className="text-3xl font-bold mb-6">Users</h3>
-        {/* Search Field */}
         <div className="max-w-md">
           <div className="mb-4 flex flex-col gap-4">
             <div className="flex items-center gap-4">
@@ -156,7 +151,7 @@ const UserManagement = (props: Props) => {
             <div className="flex items-center gap-4">
               <label
                 htmlFor="searchEmail"
-                className="min-w-[40px] block text-right  text-sm font-medium text-gray-700 mb-1"
+                className="min-w-[40px] block text-right text-sm font-medium text-gray-700 mb-1"
               >
                 Email
               </label>
@@ -193,9 +188,9 @@ const UserManagement = (props: Props) => {
             </div>
           </div>
         </div>
-        {/* Button */}
         <div className="flex items-center justify-end mb-2">
-          <button className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+          <button
+            className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
             onClick={handleSearch}
           >
             <BsSearch className="mr-2" /> Search
@@ -204,10 +199,10 @@ const UserManagement = (props: Props) => {
         <div>
           <Table
             selectedItems={selectedUsers}
-            onSelectItem={(id) => handleSelectUser(id)}
+            onSelectItem={handleSelectUser}
             onSort={handleSort}
-            onEdit={(user) => handleEditUser(user)}
-            onDelete={(id) => handleDeleteUser(id)}
+            onEdit={handleEditUser}
+            onDelete={handleDeleteUser}
             onDeleteSelected={handleDeleteUserSelected}
             itemsPerPage={users.length}
             sortBy={sortBy}
@@ -216,88 +211,82 @@ const UserManagement = (props: Props) => {
             data={users}
           />
         </div>
-        {/* Edit */}
         <Modal
           isOpen={isEditDialogOpen}
           closeModal={() => setIsEditDialogOpen(false)}
-          title="Change User role"
-          onSubmit={handleUpdateRole}
+          title="Change User Role"
+          onSubmit={formik.handleSubmit}
           submitText="Save"
           cancelText="Cancel"
         >
-          <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Name
-            </label>
-            <input
-              type="text"
-              value={userDetail.name}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              disabled
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="Email"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Email
-            </label>
-            <input
-              type="text"
-              value={userDetail.email}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              disabled
-            />
-          </div>
-
-          <div className="mb-4 flex gap-4 items-center justify-between">
-            <label
-              htmlFor="Role"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Role
-            </label>
-            <select
-              name="role"
-              value={userRole}
-              id="role-select"
-              onChange={(e) => {
-                setUserRole(e.target.value);
-              }}
-              className="border border-gray-300 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {Object.values(ROLE).map((el) => (
-                <option value={el} key={el} className="text-sm">
-                  {el}
-                </option>
-              ))}
-            </select>
-            <label
-              htmlFor="status"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Status
-            </label>
-            <select
-              name="status"
-              value={status}
-              id="role-select"
-              onChange={(e) => {
-                setStatus(e.target.value);
-              }}
-              className="border border-gray-300 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            >
-              {Object.values(Account).map((el) => (
-                <option value={el} key={el} className="text-sm">
-                  {el}
-                </option>
-              ))}
-            </select>
-          </div>
+          <form onSubmit={formik.handleSubmit}>
+            <div className="mb-4">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Name
+              </label>
+              <input
+                type="text"
+                value={formik.values.name}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                disabled
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="Email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email
+              </label>
+              <input
+                type="text"
+                value={formik.values.email}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                disabled
+              />
+            </div>
+            <div className="mb-4 flex gap-4 items-center justify-between">
+              <label
+                htmlFor="Role"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Role
+              </label>
+              <select
+                name="role"
+                value={formik.values.role}
+                onChange={formik.handleChange}
+                className="border border-gray-300 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {Object.values(ROLE).map((el) => (
+                  <option value={el} key={el} className="text-sm">
+                    {el}
+                  </option>
+                ))}
+              </select>
+              <label
+                htmlFor="status"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Status
+              </label>
+              <select
+                name="status"
+                value={formik.values.status}
+                onChange={formik.handleChange}
+                className="border border-gray-300 rounded-lg px-4 py-2 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                {Object.values(Account).map((el) => (
+                  <option value={el} key={el} className="text-sm">
+                    {el}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </form>
         </Modal>
       </div>
       {isLoading && (

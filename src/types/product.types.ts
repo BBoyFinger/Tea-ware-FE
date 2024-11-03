@@ -1,3 +1,5 @@
+import { ICategory } from "./category.types";
+
 export interface IProduct {
   _id?: string;
   productName?: string;
@@ -5,11 +7,7 @@ export interface IProduct {
   price?: number;
   quantity?: number;
   images?: { url: string; title: string }[];
-  category?: {
-    name: string;
-    desription: string;
-    productCount: 0;
-  };
+  category?: ICategory; // Use the ICategory type
   material?: string;
   stockQuantity?: number;
   availability?: string;

@@ -6,6 +6,8 @@ import { BsEyeSlashFill } from "react-icons/bs";
 import axiosInstance from "../../utils/axiosConfig";
 import { toast } from "react-toastify";
 import Context from "../../context";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 
 interface LoginForm {
   email: string;
@@ -15,38 +17,35 @@ interface LoginForm {
 const Login = () => {
   const navigate = useNavigate();
   const userContext = useContext(Context);
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [data, setData] = useState<LoginForm>({
-    email: "",
-    password: "",
-  });
+  const [showPassword, setShowPassword] = useState(false);
 
-  const handleOnchange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setData((pre) => {
-      return {
-        ...pre,
-        [name]: value,
-      };
-    });
-  };
+  const formik = useFormik<LoginForm>({
+    initialValues: {
+      email: "",
+      password: "",
+    },
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      const response = await axiosInstance.post("/signin", data);
-     
-      if (response?.data.success) {
-        toast.success(response?.data.message);
-        navigate("/")
-        userContext?.fetchUserDetails();
+    validationSchema: Yup.object({
+      email: Yup.string()
+        .email("Invalid email address!")
+        .required("Email is Required!"),
+      password: Yup.string()
+        .min(6, "Password must be at least 6 characters")
+        .required("Password is Required!"),
+    }),
+    onSubmit: async (values) => {
+      try {
+        const response = await axiosInstance.post("/signin", values);
+        if (response?.data.success) {
+          toast.success(response.data.message);
+          navigate("/");
+          userContext?.fetchUserDetails();
+        }
+      } catch (error: any) {
+        toast.error(error.response?.data.message);
       }
-
-      
-    } catch (error: any) {
-      toast.error(error.response?.data.message);
-    }
-  };
+    },
+  });
 
   return (
     <section id="login">
@@ -63,15 +62,9 @@ const Login = () => {
             </h2>
           </div>
         </div>
-
         <div className="mt-10 pb-2 sm:mx-auto sm:w-full sm:max-w-sm">
-          <form
-            action="#"
-            method="POST"
-            className="space-y-6"
-            onSubmit={handleSubmit}
-          >
-            <div className="">
+          <form onSubmit={formik.handleSubmit} className="space-y-6">
+            <div>
               <label
                 htmlFor="email"
                 className="block text-sm font-medium leading-6 text-gray-900"
@@ -83,53 +76,55 @@ const Login = () => {
                   type="email"
                   name="email"
                   id="email"
-                  required
-                  autoComplete="email"
                   className="h-full w-full outline-none bg-transparent"
-                  value={data.email}
-                  onChange={handleOnchange}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.email}
                 />
               </div>
+              {formik.touched.email && formik.errors.email ? (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.email}
+                </div>
+              ) : null}
             </div>
-
             <div>
-              <div className="flex items-center justify-between">
-                <label
-                  htmlFor="password"
-                  className="block text-sm font-medium leading-6 text-gray-900"
-                >
-                  Password
-                </label>
-              </div>
-              <div className="mt-1 flex bg-slate-100 p-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium leading-6 text-gray-900"
+              >
+                Password
+              </label>
+              <div className="mt-1 flex bg-slate-100 p-2 items-center">
                 <input
                   type={showPassword ? "text" : "password"}
                   name="password"
                   id="password"
-                  value={data.password}
-                  onChange={handleOnchange}
-                  required
-                  autoComplete="password"
                   className="h-full w-full outline-none bg-transparent"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.password}
                 />
-                <div className="cursor-pointer">
-                  <span onClick={() => setShowPassword((pre) => !pre)}>
-                    {showPassword ? <BsEyeSlashFill /> : <IoEyeSharp />}
-                  </span>
-                </div>
+                <span
+                  className="cursor-pointer"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? <BsEyeSlashFill /> : <IoEyeSharp />}
+                </span>
               </div>
+              {formik.touched.password && formik.errors.password ? (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.password}
+                </div>
+              ) : null}
             </div>
-
-            <div>
-              <button
-                type="submit"
-                className="flex w-full justify-center rounded-md bg-[#bd3030] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:opacity-[0.9] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
-              >
-                Sign In
-              </button>
-            </div>
+            <button
+              type="submit"
+              className="flex w-full justify-center rounded-md bg-[#bd3030] px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:opacity-[0.9] focus:outline-none"
+            >
+              Sign In
+            </button>
           </form>
-
           <p className="my-10 text-center text-sm text-gray-500">
             Don't have any account?{" "}
             <Link

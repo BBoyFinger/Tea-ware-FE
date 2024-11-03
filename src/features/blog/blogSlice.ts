@@ -6,6 +6,9 @@ import { BlogService } from "./blogService";
 interface initialBlog {
   blog: IBlog | null;
   blogs: IBlog[];
+  searchField: {
+    title: string;
+  };
   isLoading: boolean;
   updatedBlog: any;
   searchBlogs: [];
@@ -19,6 +22,9 @@ interface initialBlog {
 const initialState: initialBlog = {
   blog: null,
   blogs: [],
+  searchField: {
+    title: "",
+  },
   isLoading: false,
   searchBlogs: [],
   isError: false,
@@ -97,7 +103,11 @@ export const deleteBlog = createAsyncThunk(
 const blogSlice = createSlice({
   name: "category",
   initialState: initialState,
-  reducers: {},
+  reducers: {
+    setSearchField: (state, action) => {
+      state.searchField = { ...state.searchField, ...action.payload };
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getBlog.pending, (state, action) => {

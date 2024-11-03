@@ -1,10 +1,13 @@
-import { useState, useEffect, ChangeEvent } from "react";
-import { FiPlus, FiSearch } from "react-icons/fi";
-
-import { ImSpinner3 } from "react-icons/im";
-import Table from "../../../components/ui/Table";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store/store";
+import { ImSpinner3 } from "react-icons/im";
+import { toast } from "react-toastify";
+import { Modal } from "../../../components/ui/Modal";
+import Table from "../../../components/ui/Table";
+import { FiPlus, FiSearch } from "react-icons/fi";
+import { useFormik } from "formik";
+import * as Yup from "yup";
 import {
   createCategory,
   deleteCategory,
@@ -13,43 +16,14 @@ import {
   setSearchField,
   updateCategory,
 } from "../../../features/category/categorySlice";
-import { Modal } from "../../../components/ui/Modal";
 import { ICategory } from "../../../types/category.types";
-import { toast } from "react-toastify";
 
 const CategoryManagement = () => {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [categoryInfo, setCategoryInfo] = useState<ICategory | null>({
-    name: "",
-    description: "",
-    _id: "",
-  });
-  const validateCategoryInfo = (categoryInfo: ICategory) => {
-    if (!categoryInfo.name) {
-      return "Name is required";
-    }
-    if (categoryInfo.name.length < 3) {
-      return "Name must be at least 3 characters long";
-    }
-    if (!categoryInfo.description) {
-      return "Description is required";
-    }
-    if (categoryInfo.description.length < 10) {
-      return "Description must be at least 10 characters long";
-    }
-    return null;
-  };
-  const [sortBy, setSortBy] = useState("name");
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
-  const [isModalOpen, setIsModalOpen] = useState(false);
-
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
-
-  //redux
   const dispatch: AppDispatch = useDispatch();
   const categoryState = useSelector(
     (state: RootState) => state.categoryReducer
   );
+
   const {
     categories,
     isLoading,
@@ -60,8 +34,10 @@ const CategoryManagement = () => {
     searchField,
   } = categoryState;
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+
   useEffect(() => {
-    // Simulating API call to fetch categories
     dispatch(getCategories(""));
     dispatch(resetCategoryState());
   }, [dispatch]);
@@ -80,18 +56,49 @@ const CategoryManagement = () => {
     }
   }, [isSuccess, isError, updatedCategory, createdCategory]);
 
-  const handleSearch = (e: any) => {
-    const payload = {
-      name: searchField.categoryName,
-    };
-    dispatch(getCategories(payload));
-  };
+  const formik = useFormik({
+    initialValues: {
+      _id: "",
+      name: "",
+      description: "",
+    },
+    validationSchema: Yup.object({
+      name: Yup.string()
+        .min(3, "Name must be at least 3 characters long")
+        .required("Name is required"),
+      description: Yup.string()
+        .min(10, "Description must be at least 10 characters long")
+        .required("Description is required"),
+    }),
+    onSubmit: async (values: {
+      _id?: string;
+      name: string;
+      description: string;
+    }) => {
+      const payload = {
+        _id: values._id || "",
+        name: values.name,
+        description: values.description,
+        productCount: 0, // Provide a default value or calculate it as needed
+      };
 
-  const handleInputChange = (e: any) => {
-    const { value, name } = e.target;
+      if (values._id) {
+        await dispatch(updateCategory({ ...payload, _id: values._id }));
+      } else {
+        await dispatch(createCategory(payload));
+      }
 
-    setCategoryInfo({ ...categoryInfo, [name]: value });
-    dispatch(setSearchField({ [name]: value }));
+      await dispatch(resetCategoryState());
+      await dispatch(getCategories(""));
+      closeModal();
+    },
+  });
+
+  const [sortBy, setSortBy] = useState("name");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+
+  const handleSearch = () => {
+    dispatch(getCategories({ name: searchField.categoryName }));
   };
 
   const handleSort = (column: string) => {
@@ -107,77 +114,45 @@ const CategoryManagement = () => {
     setIsModalOpen(false);
   };
 
-  const handleSubmit = async () => {
-    const validationError = validateCategoryInfo(categoryInfo!);
-    if (validationError) {
-      toast.error(validationError);
-      return;
-    }
-    if (categoryInfo?._id) {
-      //Edit
-      const payload = {
-        _id: categoryInfo?._id,
-        name: categoryInfo?.name,
-        description: categoryInfo?.description,
-      };
-      await dispatch(updateCategory(payload));
-      await dispatch(resetCategoryState());
-    } else {
-      //create
-      const payload = {
-        name: categoryInfo?.name,
-        description: categoryInfo?.description,
-      };
-      await dispatch(createCategory(payload));
-      await dispatch(resetCategoryState());
-    }
-    await dispatch(getCategories(""));
-
-    closeModal();
-  };
-
   const columns = [
     { key: "name", label: "Name", sortable: true },
     { key: "description", label: "Description", sortable: true },
     { key: "productCount", label: "Product Count", sortable: true },
   ];
 
-  const handleSelectCategory = (id: any) => {
-    if (selectedCategories.includes(id)) {
-      setSelectedCategories(
-        selectedCategories.filter((categoryId) => categoryId !== id)
-      );
-    } else {
-      setSelectedCategories([...selectedCategories, id]);
-    }
+  const handleSelectCategory = (id: string) => {
+    setSelectedCategories((prev) =>
+      prev.includes(id)
+        ? prev.filter((categoryId) => categoryId !== id)
+        : [...prev, id]
+    );
   };
 
   const openModal = (category: ICategory | null = null) => {
     setIsModalOpen(true);
-    setCategoryInfo(category);
+    formik.setValues({
+      _id: category?._id || "",
+      name: category?.name || "",
+      description: category?.description || "",
+    });
   };
 
   const handleDeleteCategorySelected = async () => {
     if (
-      window.confirm("Are you sure you want to delete the selected category?")
+      window.confirm("Are you sure you want to delete the selected categories?")
     ) {
       await dispatch(deleteCategory(selectedCategories));
-      toast.success("Delete Category successfully!");
+      toast.success("Delete categories successfully!");
       dispatch(getCategories(""));
     }
   };
 
-  const handleDeleteCategory = async (id: any) => {
-    if (window.confirm("Are u sure delete this category!")) {
-      await dispatch(deleteCategory(id));
+  const handleDeleteCategory = async (ids: string[]) => {
+    if (window.confirm("Are you sure you want to delete this category?")) {
+      await dispatch(deleteCategory(ids));
       toast.success("Delete category successfully");
+      dispatch(getCategories(""));
     }
-    await dispatch(getCategories(""));
-  };
-  const handleInputSearchChange = (e: ChangeEvent<HTMLInputElement>) => {
-    const { value, name } = e.target;
-    console.log("name of input", value);
-    dispatch(setSearchField({ [name]: value }));
   };
 
   return (
@@ -192,7 +167,9 @@ const CategoryManagement = () => {
             placeholder="Search categories"
             className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={searchField.categoryName}
-            onChange={handleInputChange}
+            onChange={(e) =>
+              dispatch(setSearchField({ categoryName: e.target.value }))
+            }
           />
           <FiSearch className="absolute left-3 top-3 text-gray-400" />
         </div>
@@ -201,7 +178,7 @@ const CategoryManagement = () => {
             onClick={handleSearch}
             className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
           >
-            <FiPlus className="mr-2" /> Search Category
+            <FiSearch className="mr-2" /> Search Category
           </button>
           <button
             onClick={() => openModal(null)}
@@ -211,15 +188,13 @@ const CategoryManagement = () => {
           </button>
         </div>
       </div>
-      {/* Table */}
-
       <div>
         <Table
           selectedItems={selectedCategories}
-          onSelectItem={(id) => handleSelectCategory(id)}
+          onSelectItem={handleSelectCategory}
           onSort={handleSort}
-          onEdit={(category) => openModal(category)}
-          onDelete={(id) => handleDeleteCategory(id)}
+          onEdit={openModal}
+          onDelete={handleDeleteCategory}
           onDeleteSelected={handleDeleteCategorySelected}
           itemsPerPage={categories.length}
           sortBy={sortBy}
@@ -228,66 +203,68 @@ const CategoryManagement = () => {
           data={categories}
         />
       </div>
-      {/* Modal */}
-
       <div>
         <Modal
           isOpen={isModalOpen}
           closeModal={closeModal}
-          title={`${
-            categoryInfo?._id === undefined
-              ? "Create Category"
-              : "Edit category"
-          }`}
-          onSubmit={handleSubmit}
+          title={`${formik.values._id ? "Edit Category" : "Create Category"}`}
+          onSubmit={formik.handleSubmit}
           submitText={`${
-            categoryInfo?._id === undefined
-              ? "Create Category"
-              : "Edit category"
+            formik.values._id ? "Edit Category" : "Create Category"
           }`}
           cancelText="Cancel"
         >
-          <div className="mb-4">
-            <label
-              htmlFor="name"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Name
-            </label>
-            <input
-              type="text"
-              id="name"
-              name="name"
-              required
-              onChange={handleInputChange}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              value={categoryInfo?.name}
-            />
-          </div>
-          <div className="mb-4">
-            <label
-              htmlFor="description"
-              className="block text-sm font-medium text-gray-700"
-            >
-              Description
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              rows={3}
-              className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-              value={categoryInfo?.description}
-              onChange={handleInputChange}
-            ></textarea>
-          </div>
+          <form onSubmit={formik.handleSubmit}>
+            <div className="mb-4">
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Name
+              </label>
+              <input
+                type="text"
+                id="name"
+                name="name"
+                required
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                value={formik.values.name}
+              />
+              {formik.touched.name && formik.errors.name ? (
+                <div className="text-red-500 text-sm">{formik.errors.name}</div>
+              ) : null}
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="description"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Description
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                rows={3}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                value={formik.values.description}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+              ></textarea>
+              {formik.touched.description && formik.errors.description ? (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.description}
+                </div>
+              ) : null}
+            </div>
+          </form>
         </Modal>
       </div>
-
       {isLoading && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center">
           <div className="bg-white p-6 rounded-lg shadow-lg flex items-center flex-col">
             <ImSpinner3 className="animate-spin w-[40px] h-[40px]" />
-
             <p className="mt-4 text-gray-700">Loading...</p>
           </div>
         </div>
