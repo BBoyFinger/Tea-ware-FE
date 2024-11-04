@@ -12,7 +12,7 @@ import {
   createBlog,
   deleteBlog,
   getBlog,
-  SearchBlog,
+  searchBlog,
   updateBlog,
 } from "../../../features/blog/blogSlice";
 import { toast } from "react-toastify";
@@ -61,7 +61,7 @@ const BlogManagement = () => {
   }, [dispatch]);
 
   useEffect(() => {
-    dispatch(SearchBlog(searchQuery));
+    dispatch(searchBlog(searchQuery));
   }, [searchQuery, dispatch]);
 
   const handleDelete = async (id: string[]) => {
