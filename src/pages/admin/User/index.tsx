@@ -27,12 +27,14 @@ const UserManagement = (props: Props) => {
 
   const dispatch: AppDispatch = useDispatch();
   const userState = useSelector((state: RootState) => state.authReducer);
-  const { users, isLoading, searchField } = userState;
+  const { users, isLoading, searchField, user } = userState; // Ensure this is the logged-in user
 
   const formik = useFormik({
     initialValues: {
       email: "",
       name: "",
+      phone: "",
+      address: "",
       role: "ADMIN",
       userId: "",
       status: "Active",
@@ -48,6 +50,10 @@ const UserManagement = (props: Props) => {
             userId: values.userId,
             role: values.role,
             status: values.status,
+            phone: values.phone,
+            address: values.address,
+            email: values.email,
+            name: values.name,
           })
         ).unwrap();
         toast.success("Updated user role successfully!");
@@ -84,6 +90,8 @@ const UserManagement = (props: Props) => {
     formik.setValues({
       email: user.email,
       name: user.name,
+      phone: user.phone,
+      address: user.address,
       role: user.role,
       userId: user._id,
       status: user.status,
@@ -229,9 +237,11 @@ const UserManagement = (props: Props) => {
               </label>
               <input
                 type="text"
+                name="name"
                 value={formik.values.name}
+                onChange={formik.handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                disabled
+                disabled={formik.values.userId !== user?._id} // Disable if not the current user
               />
             </div>
             <div className="mb-4">
@@ -243,9 +253,43 @@ const UserManagement = (props: Props) => {
               </label>
               <input
                 type="text"
+                name="email"
                 value={formik.values.email}
+                onChange={formik.handleChange}
                 className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                disabled
+                disabled={formik.values.userId !== user?._id} // Disable if not the current user
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="phone"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Phone
+              </label>
+              <input
+                type="text"
+                name="phone"
+                value={formik.values.phone}
+                onChange={formik.handleChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                disabled={formik.values.userId !== user?._id} // Disable if not the current user
+              />
+            </div>
+            <div className="mb-4">
+              <label
+                htmlFor="address"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Address
+              </label>
+              <input
+                type="text"
+                name="address"
+                value={formik.values.address}
+                onChange={formik.handleChange}
+                className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                disabled={formik.values.userId !== user?._id} // Disable if not the current user
               />
             </div>
             <div className="mb-4 flex gap-4 items-center justify-between">

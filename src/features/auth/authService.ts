@@ -26,6 +26,11 @@ const updateUserRole = async (data: any) => {
   return response.data.data;
 };
 
+const changePassword = async (data: any) => {
+  const response = await axiosInstance.post("/change-password", data);
+  return response.data.data;
+};
+
 const addToCart = async (productId: any) => {
   try {
     const response = await axiosInstance.post("/addToCart", {
@@ -85,7 +90,8 @@ const authService = {
   viewProductCart,
   updateCartProduct,
   deleteCartProduct,
-  searchUser
+  searchUser,
+  changePassword,
 };
 
 export default authService;

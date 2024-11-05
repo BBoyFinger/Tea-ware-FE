@@ -1,8 +1,12 @@
 import { IBlog } from "../../types/blog.type";
 import axiosInstance from "../../utils/axiosConfig";
 
-const getBlogs = async () => {
-  const response = await axiosInstance.get("/blogs");
+const getBlogs = async (query: string) => {
+  const params = new URLSearchParams(query);
+
+  const response = await axiosInstance.get("/blogs", {
+    params: params,
+  });
   return response.data.data;
 };
 

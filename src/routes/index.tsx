@@ -23,7 +23,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import BlogDetailsPage from "../pages/blog/[id]";
 import Checkout from "../pages/Checkout";
-import Profile from "../pages/admin/Profile";
+
 import Settings from "../pages/admin/Setting";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
@@ -107,10 +107,7 @@ const router = createBrowserRouter([
             path: "setting",
             element: <Settings />,
           },
-          {
-            path: "profile",
-            element: <Profile />,
-          },
+         
         ],
       },
       {

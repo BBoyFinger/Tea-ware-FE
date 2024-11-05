@@ -75,7 +75,7 @@ const Footer = (props: Props) => {
   const blogState = useSelector((state: RootState) => state.blogReducer.blogs);
 
   useEffect(() => {
-    dispatch(getBlog());
+    dispatch(getBlog(""));
   }, [dispatch]);
   return (
     <>

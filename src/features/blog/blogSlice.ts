@@ -37,13 +37,16 @@ const initialState: initialBlog = {
 
 export const resetBlogState = createAction("Reset_BlogState");
 
-export const getBlog = createAsyncThunk("get-blogs", async (_, thunkApi) => {
-  try {
-    return await BlogService.getBlogs();
-  } catch (error) {
-    return thunkApi.rejectWithValue(error);
+export const getBlog = createAsyncThunk(
+  "get-blogs",
+  async (query: any, thunkApi) => {
+    try {
+      return await BlogService.getBlogs(query);
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
   }
-});
+);
 
 export const searchBlog = createAsyncThunk(
   "search-blogs",
@@ -199,5 +202,7 @@ const blogSlice = createSlice({
       .addCase(resetBlogState, () => initialState);
   },
 });
+
+export const { setSearchField } = blogSlice.actions;
 
 export default blogSlice.reducer;

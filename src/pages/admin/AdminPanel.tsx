@@ -5,8 +5,6 @@ import {
   FiUsers,
   FiDatabase,
   FiSettings,
-  FiCamera,
-  FiEdit2,
 } from "react-icons/fi";
 import { Outlet } from "react-router-dom"; // Import Outlet
 import { BiCategoryAlt } from "react-icons/bi";
@@ -24,24 +22,7 @@ const AdminPanel = () => {
 
   const userDetail = useSelector((state: RootState) => state.authReducer.user);
 
-  console.log(userDetail);
-
-  const [profileData, setProfileData] = useState({
-    name: "John Doe",
-    email: "john.doe@example.com",
-    address: "123 Main St, City, Country",
-    phone: "+1 234 567 890",
-    image:
-      "images.unsplash.com/photo-1633332755192-727a05c4013d?ixlib=rb-4.0.3",
-  });
   const isActiveTab = (path: any) => location.pathname === path;
-
-  const handleProfileUpdate = (field: any, value: any) => {
-    setProfileData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-  };
 
   return (
     <div className="flex h-screen">
@@ -142,19 +123,7 @@ const AdminPanel = () => {
                 <span>Order</span>
               </Link>
             </li>
-            <li>
-              <Link
-                to="/admin-panel/profile" // Cập nhật đường dẫn
-                className={`flex items-center space-x-2 w-full p-2 rounded-md ${
-                  isActiveTab("/admin-panel/profile")
-                    ? "bg-gray-700"
-                    : "hover:bg-gray-700"
-                }`}
-              >
-                <FiEdit2 />
-                <span>Profile</span>
-              </Link>
-            </li>
+
             <li>
               <Link
                 to="/admin-panel/setting" // Cập nhật đường dẫn

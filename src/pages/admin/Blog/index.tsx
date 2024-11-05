@@ -12,7 +12,7 @@ import {
   createBlog,
   deleteBlog,
   getBlog,
-  searchBlog,
+  setSearchField,
   updateBlog,
 } from "../../../features/blog/blogSlice";
 import { toast } from "react-toastify";
@@ -24,13 +24,17 @@ import { BsSearch } from "react-icons/bs";
 
 const BlogManagement = () => {
   const dispatch: AppDispatch = useDispatch();
-  const [searchQuery, setSearchQuery] = useState("");
   const blogState = useSelector((state: RootState) => state.blogReducer);
-  const { blogs, searchBlogs } = blogState;
+  const { blogs, searchField } = blogState;
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBlog, setSelectedBlog] = useState<string[]>([]);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [UploadImageInput, setUploadImageInput] = useState("");
+
+  const handleSearchInputChange = (e: any) => {
+    const { name, value } = e.target;
+    dispatch(setSearchField({ ...searchField, [name]: value }));
+  };
 
   const formik = useFormik<IBlog>({
     initialValues: {
@@ -52,23 +56,19 @@ const BlogManagement = () => {
         toast.success("Create blog successfully!");
       }
       setIsModalOpen(false);
-      await dispatch(getBlog());
+      await dispatch(getBlog(""));
     },
   });
 
   useEffect(() => {
-    dispatch(getBlog()); // Initial fetch of blogs
+    dispatch(getBlog("")); // Initial fetch of blogs
   }, [dispatch]);
-
-  useEffect(() => {
-    dispatch(searchBlog(searchQuery));
-  }, [searchQuery, dispatch]);
 
   const handleDelete = async (id: string[]) => {
     if (window.confirm("Are you sure you want to delete this blog?")) {
       await dispatch(deleteBlog(id));
       toast.success("Delete blog successfully");
-      await dispatch(getBlog());
+      await dispatch(getBlog(""));
     }
   };
 
@@ -92,12 +92,11 @@ const BlogManagement = () => {
   };
 
   const handleSearch = async () => {
-    // const payload = {
-    //   blog: searchBlogs.,
-    //   category: searchField?.category,
-    //   availability: searchField.availability,
-    // };
-    // await dispatch(getProducts(payload));
+    console.log("hello");
+    const payload = {
+      title: searchField.title,
+    };
+    await dispatch(getBlog(payload));
   };
 
   const columns = [
@@ -111,7 +110,7 @@ const BlogManagement = () => {
     if (window.confirm("Are you sure you want to delete the selected blog?")) {
       await dispatch(deleteBlog(selectedBlog));
       toast.success("Delete Blog successfully!");
-      await dispatch(getBlog());
+      await dispatch(getBlog(""));
     }
   };
 
@@ -137,10 +136,11 @@ const BlogManagement = () => {
       <div className="mb-4 flex justify-between items-center">
         <div className="relative">
           <input
+            name="title"
             type="text"
             placeholder="Search Blogs"
             className="pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            // onChange={(e) => handleSearch(e.target.value)}
+            onChange={handleSearchInputChange}
           />
           <FiSearch className="absolute left-3 top-3 text-gray-400" />
         </div>

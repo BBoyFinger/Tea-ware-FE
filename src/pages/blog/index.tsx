@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { FaSearch, FaSort, FaFilter, FaSpinner } from "react-icons/fa";
+import { FaSearch, FaSpinner } from "react-icons/fa";
 import { AppDispatch, RootState } from "../../store/store";
 import { useDispatch, useSelector } from "react-redux";
 import moment from "moment";
 import { Link } from "react-router-dom";
-import { SearchBlog } from "../../features/blog/blogSlice";
+import { searchBlog } from "../../features/blog/blogSlice";
 import scrollTop from "../../utils/scrollTop";
 
 interface Post {
@@ -27,7 +27,7 @@ const BlogPage = () => {
 
   useEffect(() => {
     fetchPosts();
-    dispatch(SearchBlog(searchQuery));
+    dispatch(searchBlog(searchQuery));
   }, [searchQuery]);
 
   const fetchPosts = async () => {
@@ -42,7 +42,6 @@ const BlogPage = () => {
   const handleSearch = (query: any) => {
     setSearchQuery(query);
   };
-
 
   return (
     <div className="container mx-auto px-4 py-8">
