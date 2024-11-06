@@ -27,6 +27,8 @@ const deleteOrder = async (ids: string[]) => {
   return response.data.data;
 };
 
+
+
 export const orderServices = {
   getOrders,
   createOrder,

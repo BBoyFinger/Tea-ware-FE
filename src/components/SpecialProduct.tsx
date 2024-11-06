@@ -1,8 +1,8 @@
-import React, { useContext } from "react";
+/* eslint-disable jsx-a11y/heading-has-content */
+
 import { IProduct } from "../types/product.types";
 import { Link } from "react-router-dom";
 import { LuShoppingCart } from "react-icons/lu";
-import Context from "../context";
 import scrollTop from "../utils/scrollTop";
 
 type Props = {

@@ -23,7 +23,7 @@ interface AuthState {
   };
   productsCart: ProductCartItem[];
   updatedUser: any;
-  addToCart: any;
+  addToCart: [];
   deleteUser: any;
   deletedCartProduct: any;
   updateCartProduct: any;
@@ -47,7 +47,7 @@ const initialState: AuthState = {
   updatedUser: null,
   updateCartProduct: null,
   deletedCartProduct: null,
-  addToCart: null,
+  addToCart: [],
   userAddToCartCount: {
     count: 0,
   },

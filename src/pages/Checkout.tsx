@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { BiArrowBack } from "react-icons/bi";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
-import { RootState } from "../store/store";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../store/store";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import PaymentButton from "../components/PaymentButton";
+import { getAllDistricts, getAllProvinces } from "../features/order/orderSlice";
 
 const shippingSchema = yup.object({
   firstName: yup.string().required("First Name is Required!"),
@@ -20,9 +21,21 @@ type Props = {};
 
 const Checkout = (props: Props) => {
   const authState = useSelector((state: RootState) => state.authReducer);
+  const orderState = useSelector((state: RootState) => state.orderReducer);
+  const dispatch: AppDispatch = useDispatch();
+
+  useEffect(() => {
+    dispatch(getAllProvinces());
+    dispatch(getAllDistricts(202));
+  }, [dispatch]);
+
+  const { provinces, districts, wards } = orderState;
+
+  console.log(provinces);
+
   const [totalAmount, setTotalAmount] = useState<number>(0);
 
-  const { productsCart } = authState;
+  const { productsCart, user } = authState;
 
   useEffect(() => {
     let sum = 0;
@@ -60,7 +73,7 @@ const Checkout = (props: Props) => {
             Contact Information
           </h4>
           <p className="user-details text-lg text-gray-600 mt-1">
-            Nguyen Van Hiep
+            {user?.name}
           </p>
           <PaymentButton />
           <form
@@ -68,24 +81,77 @@ const Checkout = (props: Props) => {
             action=""
             className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-4"
           >
-            {/* Country Selector */}
+            {/* Province Selector */}
             <div className="col-span-full lg:col-span-1">
               <select
-                name="country"
-                onChange={validateForm.handleChange("country")}
-                onBlur={validateForm.handleBlur("country")}
-                value={validateForm.values.country}
+                name="province"
+                onChange={validateForm.handleChange("province")}
+                onBlur={validateForm.handleBlur("province")}
+                value={validateForm.values.province}
                 className="w-full py-2 px-3 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
               >
-                <option value="" selected disabled>
-                  Select Country
+                <option value="" disabled>
+                  Select Province
                 </option>
-                <option value="USA">USA</option>
+                {/* Add options dynamically based on your data */}
+                {provinces.map((province) => (
+                  <option key={province.id} value={province.id}>
+                    {province.name}
+                  </option>
+                ))}
               </select>
               <div className="text-red-500 ms-1 my-1">
-                {validateForm.touched.country &&
-                  typeof validateForm.errors.country === "string" &&
-                  validateForm.errors.country}
+                {validateForm.touched.province &&
+                  typeof validateForm.errors.province === "string" &&
+                  validateForm.errors.province}
+              </div>
+            </div>
+
+            {/* District Selector */}
+            <div className="col-span-full lg:col-span-1">
+              <select
+                name="district"
+                onChange={validateForm.handleChange("district")}
+                onBlur={validateForm.handleBlur("district")}
+                value={validateForm.values.district}
+                className="w-full py-2 px-3 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
+              >
+                {districts.map((district) => (
+                  <option key={district.id} value={district.id}>
+                    {district.name}
+                  </option>
+                ))}
+              </select>
+              <div className="text-red-500 ms-1 my-1">
+                {validateForm.touched.district &&
+                  typeof validateForm.errors.district === "string" &&
+                  validateForm.errors.district}
+              </div>
+            </div>
+
+            {/* Ward Selector */}
+            <div className="col-span-full lg:col-span-1">
+              <select
+                name="ward"
+                onChange={validateForm.handleChange("ward")}
+                onBlur={validateForm.handleBlur("ward")}
+                value={validateForm.values.ward}
+                className="w-full py-2 px-3 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
+              >
+                <option value="" disabled>
+                  Select Ward
+                </option>
+                {/* Add options dynamically based on your data */}
+                {wards.map((ward) => (
+                  <option key={ward.id} value={ward.id}>
+                    {ward.name}
+                  </option>
+                ))}
+              </select>
+              <div className="text-red-500 ms-1 my-1">
+                {validateForm.touched.ward &&
+                  typeof validateForm.errors.ward === "string" &&
+                  validateForm.errors.ward}
               </div>
             </div>
 
@@ -189,28 +255,6 @@ const Checkout = (props: Props) => {
                     typeof validateForm.errors.pinCode === "string" &&
                     validateForm.errors.pinCode}
                 </div>
-              </div>
-            </div>
-            <div className="w-full mt-4 col-span-full">
-              <div className="flex justify-between items-center">
-                <Link to="/cart" className="flex items-center gap-[2px]">
-                  <BiArrowBack />
-                  Return to Cart
-                </Link>
-                <Link
-                  to="/cart"
-                  className="bg-[#f05338] hover:bg-[#ff6347] p-2 rounded-full text-white"
-                >
-                  Continute to Shipping
-                </Link>
-                <button
-                  type="submit"
-                  className="hover:bg-[#f05338] border-solid border-[1px]  border-[#f05338] bg-white text-black p-2 rounded-full hover:text-white"
-                >
-                  Place Order
-                </button>
-
-              
               </div>
             </div>
           </form>

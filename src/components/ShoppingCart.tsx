@@ -29,9 +29,14 @@ const ShoppingCart = ({
   const [isOpen, setIsOpen] = useState(false);
   const [totalAmount, setTotalAmount] = useState<number>(0);
 
+  const fetchCart = async () => {
+    await dispatch(viewProductCart());
+  };
+
   useEffect(() => {
-    dispatch(viewProductCart());
+    fetchCart();
     context?.fetchUserAddToCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch]);
 
   const increaseQuantity = async (id: any, currentQuantity: number) => {
@@ -48,7 +53,10 @@ const ShoppingCart = ({
     }
   };
 
-  const toggleCart = () => setIsOpen(!isOpen);
+  const toggleCart = async () => {
+    await dispatch(viewProductCart());
+    setIsOpen(!isOpen);
+  };
 
   const removeProduct = (id: any) => {
     if (window.confirm("Are u want to delete this product in cart?")) {
@@ -111,61 +119,64 @@ const ShoppingCart = ({
               <p className="text-center text-gray-500">Your cart is empty</p>
             ) : (
               <ul className="divide-y divide-gray-200">
-                {products?.map((item: any) => (
-                  <li key={item._id} className="py-6 flex">
-                    <div className="flex-shrink-0 w-24 h-24 border border-gray-200 rounded-md overflow-hidden">
-                      <img
-                        src={item.productId?.images[0].url}
-                        alt={item.productId?.images[0].title}
-                        className="w-full h-full object-center object-cover"
-                      />
-                    </div>
+                {products &&
+                  products?.map((item: any) => (
+                    <li key={item._id} className="py-6 flex">
+                      <div className="flex-shrink-0 w-24 h-24 border border-gray-200 rounded-md overflow-hidden">
+                        <img
+                          src={item.productId?.images[0].url}
+                          alt={item.productId?.images[0].title}
+                          className="w-full h-full object-center object-cover"
+                        />
+                      </div>
 
-                    <div className="ml-4 flex-1 flex flex-col">
-                      <div>
-                        <div className="flex justify-between text-base font-medium text-gray-900">
-                          <h3>{item.productId?.productName}</h3>
-                          <p className="ml-4">
-                            ${item.productId?.price * item.quantity}
-                          </p>
+                      <div className="ml-4 flex-1 flex flex-col">
+                        <div>
+                          <div className="flex justify-between text-base font-medium text-gray-900">
+                            <h3>{item.productId?.productName}</h3>
+                            <p className="ml-4">
+                              ${item.productId?.price * item.quantity}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex-1 flex items-end justify-between text-sm">
+                          <div className="flex items-center">
+                            <button
+                              onClick={() =>
+                                decreaseQuantity(item._id, item.quantity)
+                              }
+                              className="text-gray-500 focus:outline-none focus:text-gray-600"
+                              aria-label="Decrease quantity"
+                            >
+                              <FaMinus />
+                            </button>
+                            <p className="mx-2 text-gray-700">
+                              {item.quantity}
+                            </p>
+                            <button
+                              onClick={() =>
+                                increaseQuantity(item._id, item.quantity)
+                              }
+                              className="text-gray-500 focus:outline-none focus:text-gray-600"
+                              aria-label="Increase quantity"
+                            >
+                              <FaPlus />
+                            </button>
+                          </div>
+
+                          <div className="flex">
+                            <button
+                              type="button"
+                              onClick={() => removeProduct(item._id)}
+                              className="font-medium text-indigo-600 hover:text-indigo-500"
+                            >
+                              Remove
+                            </button>
+                          </div>
                         </div>
                       </div>
-                      <div className="flex-1 flex items-end justify-between text-sm">
-                        <div className="flex items-center">
-                          <button
-                            onClick={() =>
-                              decreaseQuantity(item._id, item.quantity)
-                            }
-                            className="text-gray-500 focus:outline-none focus:text-gray-600"
-                            aria-label="Decrease quantity"
-                          >
-                            <FaMinus />
-                          </button>
-                          <p className="mx-2 text-gray-700">{item.quantity}</p>
-                          <button
-                            onClick={() =>
-                              increaseQuantity(item._id, item.quantity)
-                            }
-                            className="text-gray-500 focus:outline-none focus:text-gray-600"
-                            aria-label="Increase quantity"
-                          >
-                            <FaPlus />
-                          </button>
-                        </div>
-
-                        <div className="flex">
-                          <button
-                            type="button"
-                            onClick={() => removeProduct(item._id)}
-                            className="font-medium text-indigo-600 hover:text-indigo-500"
-                          >
-                            Remove
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  </li>
-                ))}
+                    </li>
+                  ))}
               </ul>
             )}
 

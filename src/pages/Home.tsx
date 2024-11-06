@@ -65,7 +65,7 @@ const Home = (props: Props) => {
 
   const handleAddToCart = async (productId: string) => {
     await dispatch(addCart(productId));
-    context?.fetchUserAddToCart();
+    await context?.fetchUserAddToCart();
   };
 
   return (
