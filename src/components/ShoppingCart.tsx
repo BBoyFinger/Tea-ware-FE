@@ -196,12 +196,13 @@ const ShoppingCart = ({
                 >
                   View Cart
                 </Link>
-                <button
-                  className="border-2 text-2xl  border-[#f05338] text-white min-w-[120px] hover:text-red-500 py-[2px] px-3 rounded-3xl hover:bg-white bg-[#f04138] transition-colors duration-300"
-                  onClick={() => alert("Proceeding  to checkout")}
+                <Link
+                  to="checkout"
+                  className="border-2 text-2xl text-center border-[#f05338] text-white min-w-[120px] hover:text-red-500 py-[2px] px-3 rounded-3xl hover:bg-white bg-[#f04138] transition-colors duration-300"
+                  onClick={toggleCart}
                 >
                   Check out
-                </button>
+                </Link>
               </div>
               <div className="mt-6 flex justify-center text-sm text-center text-gray-500">
                 <p>

@@ -1,17 +1,27 @@
 import React, { useEffect, useState } from "react";
-
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { useFormik } from "formik";
 import * as yup from "yup";
-import PaymentButton from "../components/PaymentButton";
-import { getAllDistricts, getAllProvinces } from "../features/order/orderSlice";
-import axios from "axios";
+
+import {
+  getAllDistricts,
+  getAllProvinces,
+  getAllWards,
+} from "../features/order/orderSlice";
 
 const shippingSchema = yup.object({
-  firstName: yup.string().required("First Name is Required!"),
-  lastName: yup.string().required("Last Name is Required!"),
+  fullName: yup.string().required("Full Name is Required!"),
   address: yup.string().required("Address Details is Required!"),
+  province: yup.string().required("Province is Required!"),
+  district: yup.string().required("District is Required!"),
+  ward: yup.string().required("Ward is Required!"),
+  phone: yup
+    .string()
+    .required("Phone number is Required!")
+    .matches(/^[0-9]+$/, "Phone number is not valid")
+    .min(10, "Phone number must be at least 10 digits")
+    .max(15, "Phone number must be at most 15 digits"),
   city: yup.string().required("City is Required!"),
   country: yup.string().required("Country is Required!"),
   pinCode: yup.string().required("PinCode is Required!"),
@@ -24,49 +34,39 @@ const Checkout = (props: Props) => {
   const orderState = useSelector((state: RootState) => state.orderReducer);
   const dispatch: AppDispatch = useDispatch();
 
-  const [provinces, setProvinces] = useState([]);
-  const [districts, setDistricts] = useState([]);
   const [selectedProvince, setSelectedProvince] = useState("");
+  const [selectedDistrict, setSelectedDistrict] = useState("");
+  const [selectedWard, setSelectedWard] = useState("");
 
   useEffect(() => {
     dispatch(getAllProvinces());
-    dispatch(getAllDistricts("202"));
   }, [dispatch]);
 
-  const { wards } = orderState;
+  const { provinces, districts, wards } = orderState;
 
-  // Fetch provinces from the proxy server
-  const fetchProvinces = async () => {
-    try {
-      const response = await axios.get("http://localhost:8080/api/provinces");
-      setProvinces(response.data.data); // Adjust based on the API response structure
-    } catch (error) {
-      console.error("Error fetching provinces:", error);
-    }
-  };
-
-  // Fetch districts based on selected province
-  const fetchDistricts = async (provinceId: any) => {
-    try {
-      const response = await axios.get(
-        `http://localhost:8080/api/districts?province_id=${provinceId}`
-      );
-      setDistricts(response.data.data); // Adjust based on the API response structure
-    } catch (error) {
-      console.error("Error fetching districts:", error);
-    }
-  };
-  const handleProvinceChange = (event: any) => {
+  const handleProvinceChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
     const provinceId = event.target.value;
     setSelectedProvince(provinceId);
-    fetchDistricts(provinceId);
+    dispatch(getAllDistricts(provinceId));
+    setSelectedDistrict(""); // Reset district and ward when province changes
+    setSelectedWard("");
   };
 
-  useEffect(() => {
-    fetchProvinces();
-  }, []);
+  const handleDistrictChange = (
+    event: React.ChangeEvent<HTMLSelectElement>
+  ) => {
+    const districtId = event.target.value;
+    setSelectedDistrict(districtId);
+    dispatch(getAllWards(districtId)); // Fetch wards based on selected district
+    setSelectedWard(""); // Reset ward when district changes
+  };
 
-  console.log(provinces);
+  const handleWardChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const wardId = event.target.value;
+    setSelectedWard(wardId);
+  };
 
   const [totalAmount, setTotalAmount] = useState<number>(0);
 
@@ -80,18 +80,17 @@ const Checkout = (props: Props) => {
         (productsCart[index]?.productId?.price || 0);
     }
     setTotalAmount(sum);
-  }, [productsCart]); // Add productsCart as a dependency
+  }, [productsCart]);
 
   const validateForm = useFormik({
     initialValues: {
-      firstName: "",
-      other: "",
+      fullName: "",
       lastName: "",
       address: "",
-      state: "",
-      city: "",
-      country: "",
-      pinCode: "",
+      province: "",
+      district: "",
+      ward: "",
+      phone: "",
     },
     validationSchema: shippingSchema,
     onSubmit(values: any) {
@@ -100,8 +99,8 @@ const Checkout = (props: Props) => {
   });
 
   return (
-    <div className="container">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5 ">
+    <div className="container mx-auto p-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div className="checkout-left mt-6 col-span-2">
           <h3 className="text-2xl font-semibold text-gray-800">Teaware Shop</h3>
           <h4 className="text-xl font-medium text-gray-700 mt-2">
@@ -110,38 +109,30 @@ const Checkout = (props: Props) => {
           <p className="user-details text-lg text-gray-600 mt-1">
             {user?.name}
           </p>
-          <PaymentButton />
+
           <form
             onSubmit={validateForm.handleSubmit}
-            action=""
             className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 mt-4"
           >
             {/* Province Selector */}
             <div className="col-span-full lg:col-span-1">
+              <label className="block text-gray-700">Province</label>
               <select
                 name="province"
-                onChange={validateForm.handleChange("province")}
-                onBlur={validateForm.handleBlur("province")}
+                onChange={(e) => {
+                  handleProvinceChange(e);
+                  validateForm.handleChange(e);
+                }}
+                onBlur={validateForm.handleBlur}
                 value={validateForm.values.province}
-                className="w-full py-2 px-3 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
+                className="w-full py-2 px-3 pr-12 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
               >
                 <option value="" disabled>
                   Select Province
                 </option>
-                {/* Add options dynamically based on your data */}
                 {provinces.map((province: any) => (
-                  <option key={province.id} value={province.id}>
-                    {province.name}
-                  </option>
-                ))}
-              </select>
-              <select onChange={handleProvinceChange} value={selectedProvince}>
-                <option value="" disabled>
-                  Select Province
-                </option>
-                {provinces.map((province: any) => (
-                  <option key={province.id} value={province.id}>
-                    {province.name}
+                  <option key={province.ProvinceID} value={province.ProvinceID}>
+                    {province.ProvinceName}
                   </option>
                 ))}
               </select>
@@ -154,16 +145,23 @@ const Checkout = (props: Props) => {
 
             {/* District Selector */}
             <div className="col-span-full lg:col-span-1">
+              <label className="block text-gray-700">District</label>
               <select
                 name="district"
-                onChange={validateForm.handleChange("district")}
-                onBlur={validateForm.handleBlur("district")}
+                onChange={(e) => {
+                  handleDistrictChange(e);
+                  validateForm.handleChange(e);
+                }}
+                onBlur={validateForm.handleBlur}
                 value={validateForm.values.district}
-                className="w-full py-2 px-3 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
+                className="w-full py-2 px-3 pr-12 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
               >
-                {districts.map((district: any) => (
-                  <option key={district.id} value={district.id}>
-                    {district.name}
+                <option value="" disabled>
+                  Select District
+                </option>
+                {districts?.map((district: any) => (
+                  <option key={district.DistrictID} value={district.DistrictID}>
+                    {district.DistrictName}
                   </option>
                 ))}
               </select>
@@ -176,20 +174,23 @@ const Checkout = (props: Props) => {
 
             {/* Ward Selector */}
             <div className="col-span-full lg:col-span-1">
+              <label className="block text-gray-700">Ward</label>
               <select
                 name="ward"
-                onChange={validateForm.handleChange("ward")}
-                onBlur={validateForm.handleBlur("ward")}
+                onChange={(e) => {
+                  handleWardChange(e);
+                  validateForm.handleChange(e);
+                }}
+                onBlur={validateForm.handleBlur}
                 value={validateForm.values.ward}
-                className="w-full py-2 px-3 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
+                className="w-full py-2 px-3 pr-12 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
               >
                 <option value="" disabled>
                   Select Ward
                 </option>
-                {/* Add options dynamically based on your data */}
-                {wards.map((ward) => (
-                  <option key={ward.id} value={ward.id}>
-                    {ward.name}
+                {wards.map((ward: any) => (
+                  <option key={ward.WardID} value={ward.WardID}>
+                    {ward.WardName}
                   </option>
                 ))}
               </select>
@@ -203,48 +204,52 @@ const Checkout = (props: Props) => {
             {/* First and Last Name */}
             <div className="flex space-x-4 col-span-full lg:col-span-2">
               <div className="flex-grow">
+                <label className="block text-gray-700">Full Name</label>
                 <input
                   type="text"
-                  name="firstName"
-                  className="w-full py-[3px] px-2 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
-                  placeholder="First Name"
-                  onChange={validateForm.handleChange("firstName")}
-                  onBlur={validateForm.handleBlur("firstName")}
-                  value={validateForm.values.firstName}
+                  name="fullName"
+                  className="w-full py-2 px-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
+                  placeholder="FullName"
+                  onChange={validateForm.handleChange}
+                  onBlur={validateForm.handleBlur}
+                  value={validateForm.values.fullName}
                 />
                 <div className="text-red-500 ms-1 my-1">
-                  {validateForm.touched.firstName &&
-                    typeof validateForm.errors.firstName === "string" &&
-                    validateForm.errors.firstName}
+                  {validateForm.touched.fullName &&
+                    typeof validateForm.errors.fullName === "string" &&
+                    validateForm.errors.fullName}
                 </div>
               </div>
+
               <div className="flex-grow">
+                <label className="block text-gray-700">Phone Number</label>
                 <input
                   type="text"
-                  className="w-full py-[3px] px-2 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
-                  placeholder="Last Name"
-                  name="lastName"
-                  onChange={validateForm.handleChange("lastName")}
-                  onBlur={validateForm.handleBlur("lastName")}
-                  value={validateForm.values.lastName}
+                  className="w-full py-2 px-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
+                  placeholder="Phone Number"
+                  name="phone"
+                  onChange={validateForm.handleChange}
+                  onBlur={validateForm.handleBlur}
+                  value={validateForm.values.phone}
                 />
                 <div className="text-red-500 ms-1 my-1">
-                  {validateForm.touched.lastName &&
-                    typeof validateForm.errors.lastName === "string" &&
-                    validateForm.errors.lastName}
+                  {validateForm.touched.phone &&
+                    typeof validateForm.errors.phone === "string" &&
+                    validateForm.errors.phone}
                 </div>
               </div>
             </div>
 
             {/* Address */}
             <div className="col-span-full">
+              <label className="block text-gray-700">Address</label>
               <input
                 type="text"
-                className="w-full py-[3px] px-2 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
+                className="w-full py-2 px-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
                 placeholder="Address"
                 name="address"
-                onChange={validateForm.handleChange("address")}
-                onBlur={validateForm.handleBlur("address")}
+                onChange={validateForm.handleChange}
+                onBlur={validateForm.handleBlur}
                 value={validateForm.values.address}
               />
               <div className="text-red-500 ms-1 my-1">
@@ -254,53 +259,21 @@ const Checkout = (props: Props) => {
               </div>
             </div>
 
+            {/* Phone Number */}
+
             {/* Apartment */}
             <div className="col-span-full">
+              <label className="block text-gray-700">
+                Apartment, suite, etc. (optional)
+              </label>
               <input
                 type="text"
-                className="w-full py-[3px] px-2 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
+                className="w-full py-2 px-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
                 placeholder="Apartment, suite, etc. (optional)"
-                onChange={validateForm.handleChange("other")}
-                onBlur={validateForm.handleBlur("other")}
+                onChange={validateForm.handleChange}
+                onBlur={validateForm.handleBlur}
                 value={validateForm.values?.other}
               />
-            </div>
-
-            {/* City, State, Zipcode */}
-            <div className="flex space-x-4 col-span-full lg:col-span-3">
-              <div className="flex-grow">
-                <input
-                  type="text"
-                  className="w-full py-[3px] px-2 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
-                  placeholder="City"
-                  name="city"
-                  onChange={validateForm.handleChange("city")}
-                  onBlur={validateForm.handleBlur("city")}
-                  value={validateForm.values.city}
-                />
-                <div className="text-red-500 ms-1 my-1">
-                  {validateForm.touched.city &&
-                    typeof validateForm.errors.city === "string" &&
-                    validateForm.errors.city}
-                </div>
-              </div>
-
-              <div className="flex-grow">
-                <input
-                  type="text"
-                  className="w-full py-[3px] px-2 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
-                  placeholder="Zipcode"
-                  name="pinCode"
-                  onChange={validateForm.handleChange("pinCode")}
-                  onBlur={validateForm.handleBlur("pinCode")}
-                  value={validateForm.values.pinCode}
-                />
-                <div className="text-red-500 ms-1 my-1">
-                  {validateForm.touched.pinCode &&
-                    typeof validateForm.errors.pinCode === "string" &&
-                    validateForm.errors.pinCode}
-                </div>
-              </div>
             </div>
           </form>
         </div>

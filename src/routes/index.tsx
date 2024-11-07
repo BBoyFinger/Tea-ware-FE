@@ -25,6 +25,7 @@ import BlogDetailsPage from "../pages/blog/[id]";
 import Checkout from "../pages/Checkout";
 
 import Settings from "../pages/admin/Setting";
+import LocationSelector from "../pages/Location";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useSelector((state: RootState) => state.authReducer);
@@ -53,6 +54,12 @@ const router = createBrowserRouter([
           <PublicRoute>
             <Login />
           </PublicRoute>
+        ),
+      },
+      {
+        path: "/location",
+        element: (
+          <LocationSelector />
         ),
       },
       {

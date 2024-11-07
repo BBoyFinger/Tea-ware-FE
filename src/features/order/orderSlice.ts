@@ -7,6 +7,7 @@ let config = {
   headers: {
     "Content-Type": "application/json",
     Token: "497989ae-9cc3-11ef-abbe-867a64c2e80d",
+    withCredentials: false,
   },
 };
 
@@ -53,11 +54,8 @@ export const getAllProvinces = createAsyncThunk(
   "provinces/getAllProvinces",
   async (_, thunkAPI) => {
     try {
-      const response = await axios.get(
-        "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province",
-        config // Use the config with the token
-      );
-      return response.data;
+      const response = await axios.get("http://localhost:8080/api/provinces");
+      return response.data.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
         error.response?.data || "Failed to fetch provinces"
@@ -70,21 +68,11 @@ export const getAllProvinces = createAsyncThunk(
 export const getAllDistricts = createAsyncThunk(
   "districts/getAllDistricts",
   async (provinceId: string, thunkAPI) => {
-    const newConfig = {
-      headers: {
-        Token: "497989ae-9cc3-11ef-abbe-867a64c2e80d", // Ensure this token is valid
-      },
-      params: {
-        province_id: provinceId, // Send province_id as a query parameter
-      },
-    };
-
     try {
-      const response = await axios.get(
-        "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district",
-        newConfig // Use the newConfig with headers and params
-      );
-      return response.data;
+      const response = await axios.get("http://localhost:8080/api/districts", {
+        params: { province_id: provinceId },
+      });
+      return response.data.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
         error.response?.data || "Failed to fetch districts"
@@ -96,23 +84,12 @@ export const getAllDistricts = createAsyncThunk(
 // Fetch all wards based on district ID
 export const getAllWards = createAsyncThunk(
   "wards/getAllWards",
-  async (districtId: string, thunkAPI) => {
-    const newConfig = {
-      headers: {
-        Token: "497989ae-9cc3-11ef-abbe-867a64c2e80d", // Ensure this token is valid
-      },
-      params: {
-        district_id: districtId, // Send district_id as a query parameter
-      },
-    };
-
+  async (districtId: any, thunkAPI) => {
     try {
-      const response = await axios.get(
-        // Change to axios.get
-        "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward",
-        newConfig // Use the newConfig with headers and params
-      );
-      return response.data;
+      const response = await axios.get("http://localhost:8080/api/wards", {
+        params: { district_id: districtId },
+      });
+      return response.data.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
         error.response?.data || "Failed to fetch wards"
