@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { BiArrowBack } from "react-icons/bi";
-import { Link } from "react-router-dom";
+
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import PaymentButton from "../components/PaymentButton";
 import { getAllDistricts, getAllProvinces } from "../features/order/orderSlice";
+import axios from "axios";
 
 const shippingSchema = yup.object({
   firstName: yup.string().required("First Name is Required!"),
@@ -24,12 +24,47 @@ const Checkout = (props: Props) => {
   const orderState = useSelector((state: RootState) => state.orderReducer);
   const dispatch: AppDispatch = useDispatch();
 
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [selectedProvince, setSelectedProvince] = useState("");
+
   useEffect(() => {
     dispatch(getAllProvinces());
-    dispatch(getAllDistricts(202));
+    dispatch(getAllDistricts("202"));
   }, [dispatch]);
 
-  const { provinces, districts, wards } = orderState;
+  const { wards } = orderState;
+
+  // Fetch provinces from the proxy server
+  const fetchProvinces = async () => {
+    try {
+      const response = await axios.get("http://localhost:8080/api/provinces");
+      setProvinces(response.data.data); // Adjust based on the API response structure
+    } catch (error) {
+      console.error("Error fetching provinces:", error);
+    }
+  };
+
+  // Fetch districts based on selected province
+  const fetchDistricts = async (provinceId: any) => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/api/districts?province_id=${provinceId}`
+      );
+      setDistricts(response.data.data); // Adjust based on the API response structure
+    } catch (error) {
+      console.error("Error fetching districts:", error);
+    }
+  };
+  const handleProvinceChange = (event: any) => {
+    const provinceId = event.target.value;
+    setSelectedProvince(provinceId);
+    fetchDistricts(provinceId);
+  };
+
+  useEffect(() => {
+    fetchProvinces();
+  }, []);
 
   console.log(provinces);
 
@@ -94,7 +129,17 @@ const Checkout = (props: Props) => {
                   Select Province
                 </option>
                 {/* Add options dynamically based on your data */}
-                {provinces.map((province) => (
+                {provinces.map((province: any) => (
+                  <option key={province.id} value={province.id}>
+                    {province.name}
+                  </option>
+                ))}
+              </select>
+              <select onChange={handleProvinceChange} value={selectedProvince}>
+                <option value="" disabled>
+                  Select Province
+                </option>
+                {provinces.map((province: any) => (
                   <option key={province.id} value={province.id}>
                     {province.name}
                   </option>
@@ -116,7 +161,7 @@ const Checkout = (props: Props) => {
                 value={validateForm.values.district}
                 className="w-full py-2 px-3 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
               >
-                {districts.map((district) => (
+                {districts.map((district: any) => (
                   <option key={district.id} value={district.id}>
                     {district.name}
                   </option>

@@ -6,8 +6,7 @@ import axios from "axios";
 let config = {
   headers: {
     "Content-Type": "application/json",
-    Token: "d6e3dccb-6289-11ea-8b85-c60e4edfe802",
-    withCredentials: true,
+    Token: "497989ae-9cc3-11ef-abbe-867a64c2e80d",
   },
 };
 
@@ -49,11 +48,15 @@ export const getOrders = createAsyncThunk("orders", async (_, thunkApi) => {
   }
 });
 
+// Fetch all provinces
 export const getAllProvinces = createAsyncThunk(
   "provinces/getAllProvinces",
   async (_, thunkAPI) => {
     try {
-      const response = await axios.get("http://localhost:8000/api/provinces");
+      const response = await axios.get(
+        "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/province",
+        config // Use the config with the token
+      );
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
@@ -63,22 +66,24 @@ export const getAllProvinces = createAsyncThunk(
   }
 );
 
+// Fetch all districts based on province ID
 export const getAllDistricts = createAsyncThunk(
   "districts/getAllDistricts",
-  async (provinceId: any, thunkAPI) => {
+  async (provinceId: string, thunkAPI) => {
     const newConfig = {
       headers: {
-        Token: "d6e3dccb-6289-11ea-8b85-c60e4edfe802",
+        Token: "497989ae-9cc3-11ef-abbe-867a64c2e80d", // Ensure this token is valid
       },
       params: {
-        province_id: provinceId,
+        province_id: provinceId, // Send province_id as a query parameter
       },
     };
 
     try {
-      const response = await axios.get("http://localhost:8000/api/districts", {
-        params: { province_id: provinceId },
-      });
+      const response = await axios.get(
+        "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/district",
+        newConfig // Use the newConfig with headers and params
+      );
       return response.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
@@ -88,23 +93,24 @@ export const getAllDistricts = createAsyncThunk(
   }
 );
 
+// Fetch all wards based on district ID
 export const getAllWards = createAsyncThunk(
   "wards/getAllWards",
   async (districtId: string, thunkAPI) => {
     const newConfig = {
       headers: {
-        Token: "d6e3dccb-6289-11ea-8b85-c60e4edfe802",
+        Token: "497989ae-9cc3-11ef-abbe-867a64c2e80d", // Ensure this token is valid
       },
-
       params: {
-        district_id: districtId,
+        district_id: districtId, // Send district_id as a query parameter
       },
     };
 
     try {
       const response = await axios.get(
+        // Change to axios.get
         "https://dev-online-gateway.ghn.vn/shiip/public-api/master-data/ward",
-        newConfig
+        newConfig // Use the newConfig with headers and params
       );
       return response.data;
     } catch (error: any) {
@@ -114,7 +120,6 @@ export const getAllWards = createAsyncThunk(
     }
   }
 );
-
 export const createOrder = createAsyncThunk(
   "create-Order",
   async (data: IOrder, thunkApi) => {
