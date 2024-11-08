@@ -9,6 +9,7 @@ import {
   getAllProvinces,
   getAllWards,
 } from "../features/order/orderSlice";
+import Payment from "../components/order/Payment";
 
 const shippingSchema = yup.object({
   fullName: yup.string().required("Full Name is Required!"),
@@ -30,6 +31,7 @@ const shippingSchema = yup.object({
 type Props = {};
 
 const Checkout = (props: Props) => {
+  const [isVerified, setIsVerified] = useState(false);
   const authState = useSelector((state: RootState) => state.authReducer);
   const orderState = useSelector((state: RootState) => state.orderReducer);
   const dispatch: AppDispatch = useDispatch();
@@ -84,13 +86,12 @@ const Checkout = (props: Props) => {
 
   const validateForm = useFormik({
     initialValues: {
-      fullName: "",
-      lastName: "",
-      address: "",
+      fullName: user?.name || "", // Use existing user name or empty string
+      phone: user?.phone || "", // Use existing user phone or empty string
+      address: user?.address || "",
       province: "",
       district: "",
       ward: "",
-      phone: "",
     },
     validationSchema: shippingSchema,
     onSubmit(values: any) {
@@ -209,10 +210,10 @@ const Checkout = (props: Props) => {
                   type="text"
                   name="fullName"
                   className="w-full py-2 px-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
-                  placeholder="FullName"
+                  placeholder="Full Name"
                   onChange={validateForm.handleChange}
                   onBlur={validateForm.handleBlur}
-                  value={validateForm.values.fullName}
+                  value={validateForm.values.fullName} // Use formik value
                 />
                 <div className="text-red-500 ms-1 my-1">
                   {validateForm.touched.fullName &&
@@ -230,7 +231,7 @@ const Checkout = (props: Props) => {
                   name="phone"
                   onChange={validateForm.handleChange}
                   onBlur={validateForm.handleBlur}
-                  value={validateForm.values.phone}
+                  value={validateForm.values.phone} // Use formik value
                 />
                 <div className="text-red-500 ms-1 my-1">
                   {validateForm.touched.phone &&
@@ -275,6 +276,7 @@ const Checkout = (props: Props) => {
                 value={validateForm.values?.other}
               />
             </div>
+            <Payment isVerified={isVerified} />
           </form>
         </div>
         <div>

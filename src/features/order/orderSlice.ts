@@ -1,4 +1,9 @@
-import { createSlice, createAction, createAsyncThunk } from "@reduxjs/toolkit";
+import {
+  createSlice,
+  createAction,
+  createAsyncThunk,
+  PayloadAction,
+} from "@reduxjs/toolkit";
 import { IOrder } from "../../types/order.type";
 import { orderServices } from "./orderService";
 import axios from "axios";
@@ -24,6 +29,7 @@ interface IOrderState {
   isSuccess: boolean;
   message: string;
   wards: any[];
+  orderInfo: any; // Define a more specific type if possible
 }
 
 const initialState: IOrderState = {
@@ -38,6 +44,7 @@ const initialState: IOrderState = {
   updatedOrder: null,
   deletedOrder: null,
   createdOrder: null,
+  orderInfo: null,
   message: "",
 };
 
@@ -97,13 +104,30 @@ export const getAllWards = createAsyncThunk(
     }
   }
 );
+
+// export const createOrder = createAsyncThunk(
+//   "create-Order",
+//   async (data: IOrder, thunkApi) => {
+//     try {
+//       return await orderServices.createOrder(data);
+//     } catch (error) {
+//       return thunkApi.rejectWithValue(error);
+//     }
+//   }
+// );
+
 export const createOrder = createAsyncThunk(
-  "create-Order",
-  async (data: IOrder, thunkApi) => {
+  "order/createOrder",
+  async (order: any, thunkAPI) => {
     try {
-      return await orderServices.createOrder(data);
-    } catch (error) {
-      return thunkApi.rejectWithValue(error);
+      const { data } = await axios.post(
+        "http://localhost:8080/api/order",
+        order
+      );
+      localStorage.removeItem("cartItems");
+      return data;
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
@@ -133,7 +157,11 @@ export const deleteOrder = createAsyncThunk(
 const orderSlice = createSlice({
   name: "order",
   initialState: initialState,
-  reducers: {},
+  reducers: {
+    setOrderInfo(state, action: PayloadAction<any>) {
+      state.orderInfo = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getOrders.pending, (state, action) => {
