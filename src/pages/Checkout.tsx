@@ -10,6 +10,8 @@ import {
   getAllWards,
 } from "../features/order/orderSlice";
 import Payment from "../components/order/Payment";
+import { BiArrowBack } from "react-icons/bi";
+import { Link } from "react-router-dom";
 
 const shippingSchema = yup.object({
   fullName: yup.string().required("Full Name is Required!"),
@@ -31,7 +33,7 @@ const shippingSchema = yup.object({
 type Props = {};
 
 const Checkout = (props: Props) => {
-  const [isVerified, setIsVerified] = useState(false);
+  const [isVerified, setIsVerified] = useState(true);
   const authState = useSelector((state: RootState) => state.authReducer);
   const orderState = useSelector((state: RootState) => state.orderReducer);
   const dispatch: AppDispatch = useDispatch();
@@ -92,12 +94,15 @@ const Checkout = (props: Props) => {
       province: "",
       district: "",
       ward: "",
+      other: "",
     },
     validationSchema: shippingSchema,
-    onSubmit(values: any) {
-      alert(JSON.stringify(values));
+    async onSubmit(values: any) {
+      console.log(JSON.stringify(values));
     },
   });
+
+ 
 
   return (
     <div className="container mx-auto p-4">
@@ -269,6 +274,7 @@ const Checkout = (props: Props) => {
               </label>
               <input
                 type="text"
+                name="other"
                 className="w-full py-2 px-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
                 placeholder="Apartment, suite, etc. (optional)"
                 onChange={validateForm.handleChange}
@@ -276,7 +282,12 @@ const Checkout = (props: Props) => {
                 value={validateForm.values?.other}
               />
             </div>
-            <Payment isVerified={isVerified} />
+            <div className="flex col-span-full gap-4 justify-between">
+              <Link to={"/cart"} className="flex items-center gap-3">
+                <BiArrowBack /> Continute Shopping
+              </Link>
+              <Payment isVerified={isVerified} />
+            </div>
           </form>
         </div>
         <div>
