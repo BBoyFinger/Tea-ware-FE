@@ -26,6 +26,9 @@ import Checkout from "../pages/Checkout";
 
 import Settings from "../pages/admin/Setting";
 import LocationSelector from "../pages/Location";
+import VnPaySuccess from "../components/order/VnPaySuccess";
+import MyOrder from "../pages/myOrder";
+import MyProfile from "../pages/profile";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useSelector((state: RootState) => state.authReducer);
@@ -58,13 +61,15 @@ const router = createBrowserRouter([
       },
       {
         path: "/location",
-        element: (
-          <LocationSelector />
-        ),
+        element: <LocationSelector />,
       },
       {
         path: "/forgot-password",
         element: <ForgotPassword />,
+      },
+      {
+        path: "/orderSuccess",
+        element: <VnPaySuccess />,
       },
       {
         path: "/sign-up",
@@ -77,6 +82,14 @@ const router = createBrowserRouter([
       {
         path: "/cart",
         element: <CartPage />,
+      },
+      {
+        path: "myOrder",
+        element: <MyOrder />,
+      },
+      {
+        path: "myProfile",
+        element: <MyProfile />,
       },
       {
         path: "/admin-panel",
@@ -94,6 +107,7 @@ const router = createBrowserRouter([
             path: "users",
             element: <UserManagement />,
           },
+          
           {
             path: "categories",
             element: <CategoryManagement />,
@@ -114,7 +128,6 @@ const router = createBrowserRouter([
             path: "setting",
             element: <Settings />,
           },
-         
         ],
       },
       {

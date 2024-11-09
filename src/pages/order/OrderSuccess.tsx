@@ -12,8 +12,9 @@ const VnPaySuccess: React.FC = () => {
       try {
         const query = location.search;
         const { data } = await axios.get(
-          `http://localhost:8080/api/vnpay_return${query}`
+          `http://localhost:5555/api/payment/vnpay_return${query}`
         );
+        // Handle the response data if needed
         console.log(data);
       } catch (error) {
         console.error("Error fetching VNPay result:", error);
@@ -24,17 +25,19 @@ const VnPaySuccess: React.FC = () => {
   }, [location.search]);
 
   return (
-    <section id="order-success" className="relative h-screen w-full">
-      <div className="container mx-auto flex flex-col justify-center items-center h-full">
-        <span className="text-limegreen text-4xl w-12 h-12 rounded-full border-3 border-limegreen flex justify-center items-center">
+    <section id="order-success">
+      <div className="order-success">
+        <img src="/images/noproduct.webp" alt="No Product" />
+
+        <span>
           <AiOutlineCheck size={32} />
         </span>
-        <p className="mt-2 mb-5 text-2xl font-semibold">Order Success!</p>
-        <div className="flex">
-          <Link to="/myOrder" className="btn text-lg border border-gray-300 px-5 py-2 text-gray-800 rounded-lg mr-4 hover:bg-gray-300 transition">
+        <p>Order Success!</p>
+        <div className="links">
+          <Link to="/myOrder" className="btn">
             Review your order
           </Link>
-          <Link to="/" className="btn text-lg border border-gray-300 px-5 py-2 text-gray-800 rounded-lg hover:bg-gray-300 transition">
+          <Link to="/" className="btn">
             Homepage
           </Link>
         </div>

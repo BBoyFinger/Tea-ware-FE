@@ -3,37 +3,37 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { useFormik } from "formik";
 import * as yup from "yup";
+import { IOrder } from "../types/order.type";
+
 
 import {
   getAllDistricts,
   getAllProvinces,
   getAllWards,
+  setOrderInfo,
 } from "../features/order/orderSlice";
 import Payment from "../components/order/Payment";
 import { BiArrowBack } from "react-icons/bi";
 import { Link } from "react-router-dom";
-
 const shippingSchema = yup.object({
-  fullName: yup.string().required("Full Name is Required!"),
-  address: yup.string().required("Address Details is Required!"),
-  province: yup.string().required("Province is Required!"),
-  district: yup.string().required("District is Required!"),
-  ward: yup.string().required("Ward is Required!"),
-  phone: yup
-    .string()
-    .required("Phone number is Required!")
-    .matches(/^[0-9]+$/, "Phone number is not valid")
-    .min(10, "Phone number must be at least 10 digits")
-    .max(15, "Phone number must be at most 15 digits"),
-  city: yup.string().required("City is Required!"),
-  country: yup.string().required("Country is Required!"),
-  pinCode: yup.string().required("PinCode is Required!"),
+  shippingAddress: yup.object({
+    name: yup.string().required("Full Name is Required!"),
+    detail: yup.string().required("Address Details is Required!"),
+    province: yup.string().required("Province is Required!"),
+    district: yup.string().required("District is Required!"),
+    ward: yup.string().required("Ward is Required!"),
+    phone: yup
+      .string()
+      .required("Phone number is Required!")
+      .matches(/^[0-9]+$/, "Phone number is not valid")
+      .min(10, "Phone number must be at least 10 digits")
+      .max(15, "Phone number must be at most 15 digits"),
+  }),
 });
-
 type Props = {};
 
 const Checkout = (props: Props) => {
-  const [isVerified, setIsVerified] = useState(true);
+  const [isVerified, setIsVerified] = useState(false);
   const authState = useSelector((state: RootState) => state.authReducer);
   const orderState = useSelector((state: RootState) => state.orderReducer);
   const dispatch: AppDispatch = useDispatch();
@@ -86,23 +86,44 @@ const Checkout = (props: Props) => {
     setTotalAmount(sum);
   }, [productsCart]);
 
-  const validateForm = useFormik({
+  const validateForm = useFormik<IOrder>({
     initialValues: {
-      fullName: user?.name || "", // Use existing user name or empty string
-      phone: user?.phone || "", // Use existing user phone or empty string
-      address: user?.address || "",
-      province: "",
-      district: "",
-      ward: "",
-      other: "",
+      _id: "", // Assuming this is generated server-side
+      user: user?._id || "", // Use existing user ID or empty string
+      orderItems: productsCart.map((item: any) => ({
+        product: item.productId._id,
+        quantity: item.quantity,
+        price: item.productId.price,
+      })),
+      totalPrice: totalAmount,
+      status: "Pending",
+      paymentMethod: "Credit Card", // Default or user-selected method
+      shippingAddress: {
+        province: "",
+        district: "",
+        ward: "",
+        detail: user?.address || "",
+        name: user?.name || "",
+        phone: user?.phone || "",
+      },
+      paymentResult: undefined,
+      order_code: "",
+      to_ward_code: "",
+      to_district_id: undefined,
+      token: "",
+      cancelOrder: false,
     },
     validationSchema: shippingSchema,
-    async onSubmit(values: any) {
-      console.log(JSON.stringify(values));
+    async onSubmit(values) {
+      const order = JSON.stringify(values);
+      // isVerified
+      if (Object.values(validateForm.isValid).length === 0) {
+        setIsVerified(true);
+      }
+
+      dispatch(setOrderInfo(order));
     },
   });
-
- 
 
   return (
     <div className="container mx-auto p-4">
@@ -124,13 +145,13 @@ const Checkout = (props: Props) => {
             <div className="col-span-full lg:col-span-1">
               <label className="block text-gray-700">Province</label>
               <select
-                name="province"
+                name="shippingAddress.province"
                 onChange={(e) => {
                   handleProvinceChange(e);
                   validateForm.handleChange(e);
                 }}
                 onBlur={validateForm.handleBlur}
-                value={validateForm.values.province}
+                value={validateForm.values.shippingAddress.province}
                 className="w-full py-2 px-3 pr-12 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
               >
                 <option value="" disabled>
@@ -143,9 +164,10 @@ const Checkout = (props: Props) => {
                 ))}
               </select>
               <div className="text-red-500 ms-1 my-1">
-                {validateForm.touched.province &&
-                  typeof validateForm.errors.province === "string" &&
-                  validateForm.errors.province}
+                {validateForm.touched.shippingAddress?.province &&
+                  typeof validateForm.errors.shippingAddress?.province ===
+                    "string" &&
+                  validateForm.errors.shippingAddress?.province}
               </div>
             </div>
 
@@ -153,13 +175,13 @@ const Checkout = (props: Props) => {
             <div className="col-span-full lg:col-span-1">
               <label className="block text-gray-700">District</label>
               <select
-                name="district"
+                name="shippingAddress.district"
                 onChange={(e) => {
                   handleDistrictChange(e);
                   validateForm.handleChange(e);
                 }}
                 onBlur={validateForm.handleBlur}
-                value={validateForm.values.district}
+                value={validateForm.values.shippingAddress.district}
                 className="w-full py-2 px-3 pr-12 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
               >
                 <option value="" disabled>
@@ -172,9 +194,10 @@ const Checkout = (props: Props) => {
                 ))}
               </select>
               <div className="text-red-500 ms-1 my-1">
-                {validateForm.touched.district &&
-                  typeof validateForm.errors.district === "string" &&
-                  validateForm.errors.district}
+                {validateForm.touched.shippingAddress?.district &&
+                  typeof validateForm.errors.shippingAddress?.district ===
+                    "string" &&
+                  validateForm.errors.shippingAddress?.district}
               </div>
             </div>
 
@@ -182,13 +205,13 @@ const Checkout = (props: Props) => {
             <div className="col-span-full lg:col-span-1">
               <label className="block text-gray-700">Ward</label>
               <select
-                name="ward"
+                name="shippingAddress.ward"
                 onChange={(e) => {
                   handleWardChange(e);
                   validateForm.handleChange(e);
                 }}
                 onBlur={validateForm.handleBlur}
-                value={validateForm.values.ward}
+                value={validateForm.values.shippingAddress.ward}
                 className="w-full py-2 px-3 pr-12 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
               >
                 <option value="" disabled>
@@ -201,29 +224,31 @@ const Checkout = (props: Props) => {
                 ))}
               </select>
               <div className="text-red-500 ms-1 my-1">
-                {validateForm.touched.ward &&
-                  typeof validateForm.errors.ward === "string" &&
-                  validateForm.errors.ward}
+                {validateForm.touched.shippingAddress?.ward &&
+                  typeof validateForm.errors.shippingAddress?.ward ===
+                    "string" &&
+                  validateForm.errors.shippingAddress?.ward}
               </div>
             </div>
 
-            {/* First and Last Name */}
+            {/* Full Name and Phone Number */}
             <div className="flex space-x-4 col-span-full lg:col-span-2">
               <div className="flex-grow">
                 <label className="block text-gray-700">Full Name</label>
                 <input
                   type="text"
-                  name="fullName"
+                  name="shippingAddress.name"
                   className="w-full py-2 px-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
                   placeholder="Full Name"
                   onChange={validateForm.handleChange}
                   onBlur={validateForm.handleBlur}
-                  value={validateForm.values.fullName} // Use formik value
+                  value={validateForm.values.shippingAddress.name} // Use formik value
                 />
                 <div className="text-red-500 ms-1 my-1">
-                  {validateForm.touched.fullName &&
-                    typeof validateForm.errors.fullName === "string" &&
-                    validateForm.errors.fullName}
+                  {validateForm.touched.shippingAddress?.name &&
+                    typeof validateForm.errors.shippingAddress?.name ===
+                      "string" &&
+                    validateForm.errors.shippingAddress?.name}
                 </div>
               </div>
 
@@ -233,15 +258,16 @@ const Checkout = (props: Props) => {
                   type="text"
                   className="w-full py-2 px-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
                   placeholder="Phone Number"
-                  name="phone"
+                  name="shippingAddress.phone"
                   onChange={validateForm.handleChange}
                   onBlur={validateForm.handleBlur}
-                  value={validateForm.values.phone} // Use formik value
+                  value={validateForm.values.shippingAddress.phone} // Use formik value
                 />
                 <div className="text-red-500 ms-1 my-1">
-                  {validateForm.touched.phone &&
-                    typeof validateForm.errors.phone === "string" &&
-                    validateForm.errors.phone}
+                  {validateForm.touched.shippingAddress?.phone &&
+                    typeof validateForm.errors.shippingAddress?.phone ===
+                      "string" &&
+                    validateForm.errors.shippingAddress?.phone}
                 </div>
               </div>
             </div>
@@ -253,38 +279,22 @@ const Checkout = (props: Props) => {
                 type="text"
                 className="w-full py-2 px-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
                 placeholder="Address"
-                name="address"
+                name="shippingAddress.detail"
                 onChange={validateForm.handleChange}
                 onBlur={validateForm.handleBlur}
-                value={validateForm.values.address}
+                value={validateForm.values.shippingAddress.detail}
               />
               <div className="text-red-500 ms-1 my-1">
-                {validateForm.touched.address &&
-                  typeof validateForm.errors.address === "string" &&
-                  validateForm.errors.address}
+                {validateForm.touched.shippingAddress?.detail &&
+                  typeof validateForm.errors.shippingAddress?.detail ===
+                    "string" &&
+                  validateForm.errors.shippingAddress?.detail}
               </div>
             </div>
 
-            {/* Phone Number */}
-
-            {/* Apartment */}
-            <div className="col-span-full">
-              <label className="block text-gray-700">
-                Apartment, suite, etc. (optional)
-              </label>
-              <input
-                type="text"
-                name="other"
-                className="w-full py-2 px-3 text-black border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
-                placeholder="Apartment, suite, etc. (optional)"
-                onChange={validateForm.handleChange}
-                onBlur={validateForm.handleBlur}
-                value={validateForm.values?.other}
-              />
-            </div>
             <div className="flex col-span-full gap-4 justify-between">
               <Link to={"/cart"} className="flex items-center gap-3">
-                <BiArrowBack /> Continute Shopping
+                <BiArrowBack /> Continue Shopping
               </Link>
               <Payment isVerified={isVerified} />
             </div>

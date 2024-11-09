@@ -119,19 +119,33 @@ const Header = (props: Props) => {
                       <div className="py-1">
                         <nav>
                           {user?.role === ROLE.ADMIN ? (
-                            <Link
-                              to={"/admin-panel"}
-                              className="block px-4 py-2 hover:bg-slate-300 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
-                            >
-                              Admin Panel
-                            </Link>
+                            <>
+                              <Link
+                                to={"/admin-panel"}
+                                className="block px-4 py-2 hover:bg-slate-300 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
+                              >
+                                Admin Panel
+                              </Link>
+                              <Link
+                                to={"/myOrder"}
+                                className="block px-4 py-2 hover:bg-slate-300 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
+                              >
+                                MyOrder
+                              </Link>
+                            </>
                           ) : user?.role === ROLE.CUSTOMER ? (
                             <>
                               <Link
-                                to={"/profile"}
+                                to={"/myProfile"}
                                 className="block px-4 py-2 hover:bg-slate-300 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
                               >
                                 Profile
+                              </Link>
+                              <Link
+                                to={"/myOrder"}
+                                className="block px-4 py-2 hover:bg-slate-300 text-sm text-gray-700 data-[focus]:bg-gray-100 data-[focus]:text-gray-900"
+                              >
+                                MyOrder
                               </Link>
                               <Link
                                 to={"/changePassword"}

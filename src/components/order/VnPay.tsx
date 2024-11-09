@@ -15,7 +15,7 @@ const VnPay: React.FC = () => {
 
     try {
       const { data } = await axios.post(
-        "http://localhost:8080/api/payment/create",
+        "http://localhost:8080/api/payment",
         OrderPaid
       );
 

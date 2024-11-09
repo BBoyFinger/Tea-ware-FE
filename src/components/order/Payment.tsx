@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { createOrder } from "../../features/order/orderSlice";
 import VnPay from "./VnPay";
 import { AppDispatch, RootState } from "../../store/store";
+import { useNavigate } from "react-router-dom";
 
 interface PaymentProps {
   isVerified: boolean;
@@ -16,6 +17,7 @@ interface ChoosePayState {
 
 function Payment({ isVerified }: PaymentProps) {
   const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
 
   const [choosePay, setChoosePay] = useState<ChoosePayState>({
     payLater: false,
@@ -35,13 +37,16 @@ function Payment({ isVerified }: PaymentProps) {
   };
 
   const SendOrderPayLater = async () => {
+    const parseOrderInfo = JSON.parse(orderInfo);
     const OrderPaid = {
-      ...orderInfo,
-      status: "pendding",
+      ...parseOrderInfo,
+      status: "Pending",
       paymentMethod: "payLater",
     };
+
     await dispatch(createOrder(OrderPaid));
-    window.location.href = "http://localhost:3000/orderSuccess";
+    navigate("/orderSuccess");
+    // window.location.href = "http://localhost:3000/orderSuccess";
   };
 
   return (
