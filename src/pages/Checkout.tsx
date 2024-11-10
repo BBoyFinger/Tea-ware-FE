@@ -1,11 +1,10 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { useFormik } from "formik";
 import * as yup from "yup";
 import { IOrder } from "../types/order.type";
-
-
 import {
   getAllDistricts,
   getAllProvinces,
@@ -15,6 +14,7 @@ import {
 import Payment from "../components/order/Payment";
 import { BiArrowBack } from "react-icons/bi";
 import { Link } from "react-router-dom";
+
 const shippingSchema = yup.object({
   shippingAddress: yup.object({
     name: yup.string().required("Full Name is Required!"),
@@ -30,6 +30,7 @@ const shippingSchema = yup.object({
       .max(15, "Phone number must be at most 15 digits"),
   }),
 });
+
 type Props = {};
 
 const Checkout = (props: Props) => {
@@ -95,7 +96,7 @@ const Checkout = (props: Props) => {
         quantity: item.quantity,
         price: item.productId.price,
       })),
-      totalPrice: totalAmount,
+      totalPrice: 0, // Initialize with 0
       status: "Pending",
       paymentMethod: "Credit Card", // Default or user-selected method
       shippingAddress: {
@@ -114,16 +115,19 @@ const Checkout = (props: Props) => {
       cancelOrder: false,
     },
     validationSchema: shippingSchema,
-    async onSubmit(values) {
-      const order = JSON.stringify(values);
-      // isVerified
-      if (Object.values(validateForm.isValid).length === 0) {
+    onSubmit(values) {
+      if (Object.values(validateForm).length !== 0) {
         setIsVerified(true);
       }
-
+      const order = JSON.stringify(values);
       dispatch(setOrderInfo(order));
     },
   });
+
+  // Update totalPrice in formik after totalAmount is calculated
+  useEffect(() => {
+    validateForm.setFieldValue("totalPrice", totalAmount);
+  }, [totalAmount]);
 
   return (
     <div className="container mx-auto p-4">

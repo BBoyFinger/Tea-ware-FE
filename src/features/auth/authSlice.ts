@@ -152,6 +152,17 @@ export const updateUser = createAsyncThunk(
   }
 );
 
+export const removeCart = createAsyncThunk(
+  "user/remove-cart",
+  async (_, thunkApi) => {
+    try {
+      return await authService.removeAllProduct();
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+
 export const deleteUsers = createAsyncThunk(
   "delete-user",
   async (ids: string[], thunkApi) => {
@@ -330,6 +341,22 @@ export const authSlice = createSlice({
         state.message = "Password changed successfully!";
       })
       .addCase(changePassword.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = false;
+        state.isError = true;
+        state.message =
+          (action.payload as string) || "Failed to change password";
+      })
+      .addCase(removeCart.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(removeCart.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.isError = false;
+        state.addToCart = action.payload;
+      })
+      .addCase(removeCart.rejected, (state, action) => {
         state.isLoading = false;
         state.isSuccess = false;
         state.isError = true;

@@ -5,6 +5,11 @@ import { createOrder } from "../../features/order/orderSlice";
 import VnPay from "./VnPay";
 import { AppDispatch, RootState } from "../../store/store";
 import { useNavigate } from "react-router-dom";
+import {
+  removeCart,
+  userAddCartCountNumber,
+  viewProductCart,
+} from "../../features/auth/authSlice";
 
 interface PaymentProps {
   isVerified: boolean;
@@ -45,6 +50,8 @@ function Payment({ isVerified }: PaymentProps) {
     };
 
     await dispatch(createOrder(OrderPaid));
+    await dispatch(removeCart());
+    await dispatch(userAddCartCountNumber());
     navigate("/orderSuccess");
     // window.location.href = "http://localhost:3000/orderSuccess";
   };

@@ -3,6 +3,8 @@ import { FaTrash } from "react-icons/fa";
 import { FiEdit, FiTrash2 } from "react-icons/fi";
 import Pagination from "./Pagination";
 import { useState } from "react";
+import { useLocation } from "react-router-dom";
+import { GiConfirmed } from "react-icons/gi";
 
 interface TableColumn {
   key: string;
@@ -20,6 +22,7 @@ interface TableProps {
   selectedItems: string[];
   onSort: (key: string) => void;
   onEdit: (item: any) => void;
+  onConfirm?: (item: any) => void; // Make onConfirm optional
   onDelete: (id: string[]) => void;
   onDeleteSelected: () => void;
   onSelectItem: (id: string) => void;
@@ -35,29 +38,35 @@ function Table({
   onSort,
   onEdit,
   onDelete,
+  onConfirm, // Destructure onConfirm
   onDeleteSelected,
   onSelectItem,
   itemsPerPage,
 }: TableProps) {
   const [currentPage, setCurrentPage] = useState(1);
+  const location = useLocation();
 
-  // Tính toán chỉ số mục đầu tiên và cuối cùng
+  // Calculate the index of the first and last item
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
 
-  // Lấy danh sách các mục hiện tại
-  // const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
+  // Get the current items
+  const currentItems = data.slice(indexOfFirstItem, indexOfLastItem);
 
-  // Hàm phân trang
+  // Pagination function
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
         <thead className="bg-gray-200">
           <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Select
-            </th>
+            {location.pathname !== "/admin-panel/orders" ? (
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Select
+              </th>
+            ) : null}
+
             {columns.map((column) => (
               <th
                 key={column.key}
@@ -76,16 +85,19 @@ function Table({
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-200">
-          {data?.map((item: any) => (
+          {currentItems.map((item: any) => (
             <tr key={item.id}>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <input
-                  type="checkbox"
-                  checked={selectedItems.includes(item._id)}
-                  onChange={() => onSelectItem(item._id)}
-                  className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-                />
-              </td>
+              {location.pathname !== "/admin-panel/orders" ? (
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <input
+                    type="checkbox"
+                    checked={selectedItems.includes(item._id)}
+                    onChange={() => onSelectItem(item._id)}
+                    className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                  />
+                </td>
+              ) : null}
+
               {columns.map((column) => (
                 <td
                   key={`${column.key}-${item.id}`}
@@ -140,24 +152,78 @@ function Table({
                     <span title={item[column.key]}>
                       {item[column.key]?.substring(0, 50)} ...
                     </span>
+                  ) : column.key === "shippingAddress" ? (
+                    <div className="relative group">
+                      <div>
+                        {item.shippingAddress?.detail.substring(0, 60)}...
+                      </div>
+                      <div className="absolute hidden w-full group-hover:block bg-gray-800 text-white text-xs rounded-md p-2  z-10 -mt-10">
+                        {item.shippingAddress?.detail}
+                      </div>
+                    </div>
+                  ) : column.key === "user" ? (
+                    item.user?.name
+                  ) : column.key === "totalPrice" ? (
+                    <p>{item.totalPrice} $</p>
                   ) : (
                     item[column.key]
                   )}
                 </td>
               ))}
               <td className="px-6 py-4 whitespace-nowrap">
-                <button
-                  onClick={() => onEdit(item)}
-                  className="text-blue-600 hover:text-blue-900 mr-3"
-                >
-                  <FiEdit />
-                </button>
-                <button
-                  onClick={() => onDelete(item._id)}
-                  className="text-red-600 hover:text-red-900"
-                >
-                  <FiTrash2 />
-                </button>
+                {location.pathname !== "/admin-panel/orders" ? (
+                  <div className="flex">
+                    <div className="relative group">
+                      <button
+                        onClick={() => onEdit(item)}
+                        className="text-blue-600 hover:text-blue-900 mr-3"
+                      >
+                        <FiEdit />
+                      </button>
+                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-md p-1">
+                        Edit
+                      </span>
+                    </div>
+                    <div className="relative group">
+                      <button
+                        onClick={() => onDelete(item._id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        <FiTrash2 />
+                      </button>
+                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-md p-1">
+                        Delete
+                      </span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="flex gap-3">
+                    {onConfirm && (
+                      <div className="relative group">
+                        <button
+                          onClick={() => onConfirm(item)}
+                          className="text-green-600 hover:text-green-900"
+                        >
+                          <GiConfirmed />
+                        </button>
+                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-md p-1">
+                          Confirm
+                        </span>
+                      </div>
+                    )}
+                    <div className="relative group">
+                      <button
+                        onClick={() => onEdit(item)}
+                        className="text-blue-600 hover:text-blue-900 mr-3"
+                      >
+                        <FiEdit />
+                      </button>
+                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-md p-1">
+                        Edit
+                      </span>
+                    </div>
+                  </div>
+                )}
               </td>
             </tr>
           ))}

@@ -1,5 +1,14 @@
 interface IOrderItem {
-  product: string; // Assuming product is stored as an ObjectId string
+  product: {
+    productName: string;
+    images: [
+      {
+        url: string;
+        title: string;
+        _id: string;
+      }
+    ];
+  }; // Assuming product is stored as an ObjectId string
   quantity: number;
   price: number;
 }

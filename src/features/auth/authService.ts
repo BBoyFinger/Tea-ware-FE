@@ -74,6 +74,11 @@ const updateCartProduct = async (productId: string, newQuantity: number) => {
   return response.data.data;
 };
 
+const removeAllProduct = async () => {
+  const response = await axiosInstance.delete("/removeProductCart");
+  return response.data.data;
+};
+
 const deleteCartProduct = async (productId: string) => {
   const response = await axiosInstance.post("/delete-cart-product", {
     _id: productId,
@@ -91,6 +96,7 @@ const authService = {
   updateCartProduct,
   deleteCartProduct,
   searchUser,
+  removeAllProduct,
   changePassword,
 };
 
