@@ -1,28 +1,18 @@
-import React, { useState, ChangeEvent, FormEvent } from "react";
-import {
-  FaFacebook,
-  FaTwitter,
-  FaLinkedin,
-  FaGithub,
-  FaTrash,
-} from "react-icons/fa";
+import React, { ChangeEvent } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AppDispatch, RootState } from "../../store/store";
 import { updateUser } from "../../features/auth/authSlice";
-
-interface SocialLink {
-  platform: string;
-  url: string;
-}
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { imageToBase64 } from "../../utils/imageTobase64"; // Import the utility function
 
 interface ProfileData {
   name: string;
   email: string;
   phone: string;
   address: string;
-  bio: string;
   profileImage: string;
 }
 
@@ -30,41 +20,47 @@ const MyProfile: React.FC = () => {
   const user = useSelector((state: RootState) => state.authReducer.user);
   const dispatch: AppDispatch = useDispatch();
 
-  const [profileData, setProfileData] = useState<ProfileData>({
-    name: "John Doe",
-    email: "johndoe@example.com",
-    phone: "+1 234 567 8900",
-    address: "Ha Noi Viet Nam",
-    bio: "Passionate developer with expertise in React and Web Development",
-    profileImage:
-      "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
+  const formik = useFormik<ProfileData>({
+    initialValues: {
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+      address: user?.address || "",
+      profileImage: user?.pictureImg || "",
+    },
+    validationSchema: Yup.object({
+      name: Yup.string().required("Name is required"),
+      email: Yup.string()
+        .email("Invalid email address")
+        .required("Email is required"),
+      phone: Yup.string().required("Phone is required"),
+      address: Yup.string().required("Address is required"),
+    }),
+    onSubmit: async (values) => {
+      try {
+        await dispatch(
+          updateUser({
+            userId: user?._id,
+            phone: values.phone,
+            address: values.address,
+            email: values.email,
+            name: values.name,
+            pictureImg: values.profileImage,
+          })
+        ).unwrap();
+        toast.success("Profile updated successfully!");
+      } catch (error) {
+        toast.error("Failed to update profile!");
+      }
+    },
   });
 
-  const handleInputChange = (
-    e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setProfileData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setProfileData((prev) => ({
-          ...prev,
-          profileImage: e.target?.result as string,
-        }));
-      };
-      reader.readAsDataURL(file);
+      const imageBase64 = await imageToBase64(file);
+      formik.setFieldValue("profileImage", imageBase64);
     }
-  };
-
-  const handleSubmit = (e: FormEvent) => {
-    e.preventDefault();
-    toast.success("Profile updated successfully!");
-    dispatch(updateUser());
   };
 
   return (
@@ -74,7 +70,7 @@ const MyProfile: React.FC = () => {
         <div className="px-6 py-8 -mt-16">
           <div className="relative mb-8">
             <img
-              src={user?.pictureImg}
+              src={formik.values.profileImage}
               alt="Profile"
               className="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-lg object-cover"
             />
@@ -93,7 +89,7 @@ const MyProfile: React.FC = () => {
             </label>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={formik.handleSubmit} className="space-y-6">
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Name
@@ -101,10 +97,14 @@ const MyProfile: React.FC = () => {
               <input
                 type="text"
                 name="name"
-                value={user?.name}
-                onChange={handleInputChange}
+                value={formik.values.name}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
+              {formik.touched.name && formik.errors.name ? (
+                <div className="text-red-500 text-sm">{formik.errors.name}</div>
+              ) : null}
             </div>
 
             <div>
@@ -114,10 +114,16 @@ const MyProfile: React.FC = () => {
               <input
                 type="email"
                 name="email"
-                value={user?.email}
-                onChange={handleInputChange}
+                value={formik.values.email}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
+              {formik.touched.email && formik.errors.email ? (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.email}
+                </div>
+              ) : null}
             </div>
 
             <div>
@@ -127,10 +133,16 @@ const MyProfile: React.FC = () => {
               <input
                 type="tel"
                 name="phone"
-                value={user?.phone}
-                onChange={handleInputChange}
+                value={formik.values.phone}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
+              {formik.touched.phone && formik.errors.phone ? (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.phone}
+                </div>
+              ) : null}
             </div>
 
             <div>
@@ -138,12 +150,18 @@ const MyProfile: React.FC = () => {
                 Address
               </label>
               <input
-                type="tel"
-                name="phone"
-                value={user?.address}
-                onChange={handleInputChange}
+                type="text"
+                name="address"
+                value={formik.values.address}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
               />
+              {formik.touched.address && formik.errors.address ? (
+                <div className="text-red-500 text-sm">
+                  {formik.errors.address}
+                </div>
+              ) : null}
             </div>
 
             <div className="flex justify-end">
