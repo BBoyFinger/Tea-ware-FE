@@ -6,10 +6,11 @@ import {
   FaGithub,
   FaTrash,
 } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { RootState } from "../../store/store";
+import { AppDispatch, RootState } from "../../store/store";
+import { updateUser } from "../../features/auth/authSlice";
 
 interface SocialLink {
   platform: string;
@@ -23,12 +24,12 @@ interface ProfileData {
   address: string;
   bio: string;
   profileImage: string;
-  socialLinks: SocialLink[];
-  skills: string[];
 }
 
 const MyProfile: React.FC = () => {
   const user = useSelector((state: RootState) => state.authReducer.user);
+  const dispatch: AppDispatch = useDispatch();
+
   const [profileData, setProfileData] = useState<ProfileData>({
     name: "John Doe",
     email: "johndoe@example.com",
@@ -37,13 +38,6 @@ const MyProfile: React.FC = () => {
     bio: "Passionate developer with expertise in React and Web Development",
     profileImage:
       "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e",
-    socialLinks: [
-      { platform: "facebook", url: "https://facebook.com" },
-      { platform: "twitter", url: "https://twitter.com" },
-      { platform: "linkedin", url: "https://linkedin.com" },
-      { platform: "github", url: "https://github.com" },
-    ],
-    skills: ["React", "JavaScript", "TailwindCSS"],
   });
 
   const handleInputChange = (
@@ -70,6 +64,7 @@ const MyProfile: React.FC = () => {
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault();
     toast.success("Profile updated successfully!");
+    dispatch(updateUser());
   };
 
   return (
