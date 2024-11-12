@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store/store";
 import { ImSpinner3 } from "react-icons/im";
@@ -16,6 +16,7 @@ import { Modal } from "../../../components/ui/Modal";
 import { Account, ROLE } from "../../../utils/User";
 import Table from "../../../components/ui/Table";
 import { BsSearch } from "react-icons/bs";
+import { imageToBase64 } from "../../../utils/imageTobase64";
 
 type Props = {};
 
@@ -35,6 +36,7 @@ const UserManagement = (props: Props) => {
       name: "",
       phone: "",
       address: "",
+      pictureImg: "",
       role: "ADMIN",
       userId: "",
       status: "Active",
@@ -52,6 +54,7 @@ const UserManagement = (props: Props) => {
             status: values.status,
             phone: values.phone,
             address: values.address,
+            pictureImg: values.pictureImg,
             email: values.email,
             name: values.name,
           })
@@ -86,11 +89,14 @@ const UserManagement = (props: Props) => {
     dispatch(searchUser(searchField));
   };
 
+  console.log(user);
+
   const handleEditUser = (user: any) => {
     formik.setValues({
       email: user.email,
       name: user.name,
       phone: user.phone,
+      pictureImg: user.pictureImg,
       address: user.address,
       role: user.role,
       userId: user._id,
@@ -130,6 +136,14 @@ const UserManagement = (props: Props) => {
     } else {
       setSortBy(column);
       setSortOrder("asc");
+    }
+  };
+
+  const handleImageChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const imageBase64 = await imageToBase64(file);
+      formik.setFieldValue("pictureImg", imageBase64);
     }
   };
 
@@ -228,6 +242,30 @@ const UserManagement = (props: Props) => {
           cancelText="Cancel"
         >
           <form onSubmit={formik.handleSubmit}>
+            <div>
+              {" "}
+              <img
+                src={formik.values.pictureImg}
+                alt="Profile"
+                className="w-32 h-32 rounded-full mx-auto border-4 border-white shadow-lg object-cover"
+              />
+              <input
+                type="file"
+                onChange={handleImageChange}
+                className="hidden"
+                id="profile-image"
+                accept="image/*"
+                disabled={
+                  formik.values.userId !== user?._id || user?.role === "admin"
+                }
+              />
+              <label
+                htmlFor="profile-image"
+                className="block text-center mt-2 text-sm text-blue-600 cursor-pointer hover:text-blue-800"
+              >
+                Change Photo
+              </label>
+            </div>
             <div className="mb-4">
               <label
                 htmlFor="name"
