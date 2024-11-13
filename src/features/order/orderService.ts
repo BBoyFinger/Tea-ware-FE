@@ -6,6 +6,11 @@ const getOrders = async () => {
   return response.data.data;
 };
 
+const getOrdersByUser = async (id: string) => {
+  const response = await axiosInstance.get(`/orders/user/${id}`);
+  return response.data.data;
+};
+
 const createOrder = async (data: IOrder) => {
   const response = await axiosInstance.post("/order", data);
   return response.data.data;
@@ -27,11 +32,10 @@ const deleteOrder = async (ids: string[]) => {
   return response.data.data;
 };
 
-
-
 export const orderServices = {
   getOrders,
   createOrder,
   editOrder,
   deleteOrder,
+  getOrdersByUser,
 };

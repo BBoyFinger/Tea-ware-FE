@@ -21,6 +21,7 @@ interface IOrderState {
   districts: any[];
   order: IOrder | null;
   orders: IOrder[];
+  userOrders: any[];
   isLoading: boolean;
   updatedOrder: any;
   deletedOrder: any;
@@ -37,6 +38,7 @@ const initialState: IOrderState = {
   districts: [],
   wards: [],
   order: null,
+  userOrders: [],
   orders: [],
   isLoading: false,
   isError: false,
@@ -55,6 +57,17 @@ export const getOrders = createAsyncThunk("orders", async (_, thunkApi) => {
     return thunkApi.rejectWithValue(error);
   }
 });
+
+export const getOrdersByUser = createAsyncThunk(
+  "orders/users",
+  async (id: string, thunkApi) => {
+    try {
+      return await orderServices.getOrdersByUser(id);
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
 
 // Fetch all provinces
 export const getAllProvinces = createAsyncThunk(
@@ -238,6 +251,19 @@ const orderSlice = createSlice({
         state.wards = action.payload;
       })
       .addCase(getAllWards.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload as string;
+      })
+      .addCase(getOrdersByUser.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(getOrdersByUser.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.userOrders = action.payload;
+      })
+      .addCase(getOrdersByUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload as string;
