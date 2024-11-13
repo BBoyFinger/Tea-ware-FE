@@ -1,64 +1,16 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { FaBox, FaTruck, FaCheck, FaClock } from "react-icons/fa";
 import { BiPackage } from "react-icons/bi";
 import { AppDispatch, RootState } from "../../store/store";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  cancelOrder,
-  getOrdersByUser,
-  updateOrderQuantity,
-} from "../../features/order/orderSlice";
-
-interface IOrderItem {
-  product: {
-    productName: string;
-    images: [
-      {
-        url: string;
-        title: string;
-        _id: string;
-      }
-    ];
-  };
-  quantity: number;
-  price: number;
-}
-
-interface IShippingAddress {
-  province?: string;
-  district?: string;
-  ward?: string;
-  detail?: string;
-  name?: string;
-  phone?: string;
-}
-
-interface IPaymentResult {
-  id?: string;
-  status?: string;
-  update_time?: string;
-  email_address?: string;
-}
-
-interface IOrder {
-  _id: string;
-  user: string;
-  orderItems: IOrderItem[];
-  totalPrice: number;
-  status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";
-  paymentMethod: "Credit Card" | "PayPal" | "Cash On Delivery";
-  shippingAddress: IShippingAddress;
-  paymentResult?: IPaymentResult;
-  order_code?: string;
-  to_ward_code?: string;
-  to_district_id?: number;
-  token?: string;
-  cancelOrder?: boolean;
-  createdAt?: Date;
-  updatedAt?: Date;
-}
+import { deleteOrder, getOrdersByUser } from "../../features/order/orderSlice";
+import { IOrder, IOrderItem, IShippingAddress } from "../../types/order.type";
+import { toast } from "react-toastify";
 
 const MyOrder: React.FC = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [cancellationReason, setCancellationReason] = useState("");
   const dispatch: AppDispatch = useDispatch();
   const orders = useSelector(
     (state: RootState) => state.orderReducer.userOrders
@@ -71,16 +23,25 @@ const MyOrder: React.FC = () => {
     }
   }, [dispatch, user]);
 
-  const handleCancelOrder = (orderId: string) => {
-    dispatch(cancelOrder(orderId)); // Dispatch the cancel order action
+  const openModal = (orderId: string) => {
+    console.log(orderId);
+    setSelectedOrderId(orderId);
+    setIsModalOpen(true);
   };
 
-  const handleUpdateQuantity = (
-    orderId: string,
-    itemId: string,
-    newQuantity: number
-  ) => {
-    dispatch(updateOrderQuantity({ orderId, itemId, newQuantity })); // Dispatch the update quantity action
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setCancellationReason("");
+  };
+
+  const handleCancelOrder = async () => {
+    console.log(selectedOrderId);
+    if (selectedOrderId) {
+      await dispatch(deleteOrder(selectedOrderId));
+      await dispatch(getOrdersByUser(user?._id as string));
+      toast.success("Cancel order successfully!");
+      closeModal();
+    }
   };
 
   if (!orders) {
@@ -90,6 +51,8 @@ const MyOrder: React.FC = () => {
       </div>
     );
   }
+
+  console.log(orders);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
@@ -116,7 +79,7 @@ const MyOrder: React.FC = () => {
                 <ShippingInfo address={order.shippingAddress} />
                 {order.status === "Pending" && (
                   <button
-                    onClick={() => handleCancelOrder(order._id)}
+                    onClick={() => openModal(order._id)}
                     className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
                   >
                     Cancel Order
@@ -127,6 +90,32 @@ const MyOrder: React.FC = () => {
           </div>
         ))}
       </div>
+
+      {isModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white p-6 rounded-md">
+            <h2 className="text-xl font-bold mb-4">Cancel Order</h2>
+            <textarea
+              value={cancellationReason}
+              onChange={(e) => setCancellationReason(e.target.value)}
+              placeholder="Enter cancellation reason"
+              className="w-full p-2 border rounded-md mb-4"
+            />
+            <button
+              onClick={handleCancelOrder}
+              className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 mr-2"
+            >
+              Confirm
+            </button>
+            <button
+              onClick={closeModal}
+              className="bg-gray-300 text-black px-4 py-2 rounded-md hover:bg-gray-400"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

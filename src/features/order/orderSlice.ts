@@ -1,9 +1,4 @@
-import {
-  createSlice,
-  createAction,
-  createAsyncThunk,
-  PayloadAction,
-} from "@reduxjs/toolkit";
+import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { IOrder } from "../../types/order.type";
 import { orderServices } from "./orderService";
 import axios from "axios";
@@ -31,7 +26,7 @@ interface IOrderState {
   message: string;
   wards: any[];
   orderInfo: any; // Define a more specific type if possible
-  confirmOrder: any
+  confirmOrder: any;
 }
 
 const initialState: IOrderState = {
@@ -60,13 +55,16 @@ export const getOrders = createAsyncThunk("orders", async (_, thunkApi) => {
   }
 });
 
-export const confirmOrderByAdmin = createAsyncThunk("orders/confirm-order", async (orderId: string, thunkApi) => {
-  try {
-    return await orderServices.confirmOrder(orderId);
-  } catch (error) {
-    return thunkApi.rejectWithValue(error);
+export const confirmOrderByAdmin = createAsyncThunk(
+  "orders/confirm-order",
+  async (orderId: string, thunkApi) => {
+    try {
+      return await orderServices.confirmOrder(orderId);
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
   }
-});
+);
 
 export const getOrdersByUser = createAsyncThunk(
   "orders/users",
@@ -128,7 +126,6 @@ export const getAllWards = createAsyncThunk(
   }
 );
 
-
 export const createOrder = createAsyncThunk(
   "order/createOrder",
   async (order: any, thunkAPI) => {
@@ -157,26 +154,15 @@ export const updateOrder = createAsyncThunk(
 );
 
 export const deleteOrder = createAsyncThunk(
-  "delete-Order",
-  async (ids: string[], thunkApi) => {
+  "orders/deleteOrder",
+  async (orderId: string, thunkAPI) => {
     try {
-      return await orderServices.deleteOrder(ids);
-    } catch (error) {
-      return thunkApi.rejectWithValue(error);
+      return await orderServices.deleteOrder(orderId);
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(error.response.data);
     }
   }
 );
-
-export const cancelOrder = createAsyncThunk('orders/cancelOrder', async (orderId: string) => {
-  const response = await orderServices.cancelOrder(orderId);
-  return response.data; // Adjust based on your API response
-});
-
-export const updateOrderQuantity = createAsyncThunk('orders/updateOrderQuantity', async ({ orderId, itemId, newQuantity }: { orderId: string; itemId: string; newQuantity: number }) => {
-  const response = await orderServices.updateOrderQuantity(orderId, itemId, newQuantity);
-  return response.data; // Adjust based on your API response
-});
-
 
 const orderSlice = createSlice({
   name: "order",
@@ -273,7 +259,8 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.userOrders = action.payload;
-      }).addCase(getOrdersByUser.rejected, (state, action) => {
+      })
+      .addCase(getOrdersByUser.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload as string;
@@ -287,6 +274,19 @@ const orderSlice = createSlice({
         state.confirmOrder = action.payload;
       })
       .addCase(confirmOrderByAdmin.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload as string;
+      })
+      .addCase(deleteOrder.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(deleteOrder.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.deletedOrder = action.payload;
+      })
+      .addCase(deleteOrder.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload as string;

@@ -1,4 +1,4 @@
-interface IOrderItem {
+export interface IOrderItem {
   product: {
     productName: string;
     images: [
@@ -8,12 +8,12 @@ interface IOrderItem {
         _id: string;
       }
     ];
-  }; // Assuming product is stored as an ObjectId string
+  };
   quantity: number;
   price: number;
 }
 
-interface IShippingAddress {
+export interface IShippingAddress {
   province?: string;
   district?: string;
   ward?: string;
@@ -31,7 +31,7 @@ interface IPaymentResult {
 
 export interface IOrder {
   _id: string;
-  user: string; // Assuming user is stored as an ObjectId string
+  user: string;
   orderItems: IOrderItem[];
   totalPrice: number;
   status: "Pending" | "Processing" | "Shipped" | "Delivered" | "Cancelled";

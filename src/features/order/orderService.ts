@@ -30,25 +30,14 @@ const editOrder = async (data: IOrder) => {
   return response.data.data;
 };
 
-const deleteOrder = async (ids: string[]) => {
-  const response = await axiosInstance.delete("/order", {
-    data: { ids: ids },
-  });
-  return response.data.data;
-};
-
-const cancelOrder = async (id: string) => {
-  const response = await axiosInstance.get(`/orders/user/${id}`);
-  return response.data.data;
-};
-
-const updateOrderQuantity = async (
-  orderId: any,
-  itemId: any,
-  newQuantity: any
-) => {
-  const response = await axiosInstance.get(`/orders/user/${orderId}`);
-  return response.data.data;
+export const deleteOrder = async (_id: string): Promise<any> => {
+  try {
+    const response = await axiosInstance.delete(`/order/${_id}`);
+    return response.data.data;
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    throw error;
+  }
 };
 
 export const orderServices = {
@@ -58,6 +47,4 @@ export const orderServices = {
   deleteOrder,
   getOrdersByUser,
   confirmOrder,
-  cancelOrder,
-  updateOrderQuantity,
 };

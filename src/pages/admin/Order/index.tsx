@@ -10,8 +10,6 @@ import { BsSearch } from "react-icons/bs";
 import { ImSpinner3 } from "react-icons/im";
 import Table from "../../../components/ui/Table";
 import { IOrder } from "../../../types/order.type";
-import axios from "axios";
-import axiosInstance from "../../../utils/axiosConfig";
 
 const OrderManagement = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -49,8 +47,8 @@ const OrderManagement = () => {
   const handleConfirm = async (order: any) => {
     setCurrentOrder(order);
     if (currentOrder) {
-      dispatch(confirmOrderByAdmin(currentOrder._id));
-      dispatch(getOrders()); // Refresh the orders list after confirmation
+      await dispatch(confirmOrderByAdmin(currentOrder._id));
+      await dispatch(getOrders()); // Refresh the orders list after confirmation
     }
   };
 
