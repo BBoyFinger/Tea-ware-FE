@@ -23,7 +23,7 @@ interface TableProps {
   onSort: (key: string) => void;
   onEdit: (item: any) => void;
   onConfirm?: (item: any) => void; // Make onConfirm optional
-  onDelete: (id: string[]) => void;
+  onDelete?: (id: string[]) => void;
   onDeleteSelected: () => void;
   onSelectItem: (id: string) => void;
   itemsPerPage: number;
@@ -108,7 +108,7 @@ function Table({
                   ) : column.key === "status" ? (
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        item.status === "Active"
+                        item.status === "Active" || item.status === "Processing"
                           ? "bg-green-100 text-green-800"
                           : "bg-red-100 text-red-800"
                       }`}
@@ -185,15 +185,19 @@ function Table({
                       </span>
                     </div>
                     <div className="relative group">
-                      <button
-                        onClick={() => onDelete(item._id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        <FiTrash2 />
-                      </button>
-                      <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-md p-1">
-                        Delete
-                      </span>
+                      {onDelete && (
+                        <div>
+                          <button
+                            onClick={() => onDelete(item._id)}
+                            className="text-red-600 hover:text-red-900"
+                          >
+                            <FiTrash2 />
+                          </button>
+                          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-md p-1">
+                            Delete
+                          </span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 ) : (

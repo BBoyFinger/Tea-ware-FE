@@ -3,7 +3,11 @@ import { FaBox, FaTruck, FaCheck, FaClock } from "react-icons/fa";
 import { BiPackage } from "react-icons/bi";
 import { AppDispatch, RootState } from "../../store/store";
 import { useDispatch, useSelector } from "react-redux";
-import { getOrdersByUser } from "../../features/order/orderSlice";
+import {
+  cancelOrder,
+  getOrdersByUser,
+  updateOrderQuantity,
+} from "../../features/order/orderSlice";
 
 interface IOrderItem {
   product: {
@@ -67,6 +71,18 @@ const MyOrder: React.FC = () => {
     }
   }, [dispatch, user]);
 
+  const handleCancelOrder = (orderId: string) => {
+    dispatch(cancelOrder(orderId)); // Dispatch the cancel order action
+  };
+
+  const handleUpdateQuantity = (
+    orderId: string,
+    itemId: string,
+    newQuantity: number
+  ) => {
+    dispatch(updateOrderQuantity({ orderId, itemId, newQuantity })); // Dispatch the update quantity action
+  };
+
   if (!orders) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -74,8 +90,6 @@ const MyOrder: React.FC = () => {
       </div>
     );
   }
-
-  console.log(orders);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
@@ -100,6 +114,14 @@ const MyOrder: React.FC = () => {
                   paymentMethod={order.paymentMethod}
                 />
                 <ShippingInfo address={order.shippingAddress} />
+                {order.status === "Pending" && (
+                  <button
+                    onClick={() => handleCancelOrder(order._id)}
+                    className="mt-4 bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600"
+                  >
+                    Cancel Order
+                  </button>
+                )}
               </div>
             </div>
           </div>
@@ -109,7 +131,9 @@ const MyOrder: React.FC = () => {
   );
 };
 
-const OrderDetails: React.FC<{ items: IOrderItem[] }> = ({ items }) => (
+const OrderDetails: React.FC<{
+  items: IOrderItem[];
+}> = ({ items }) => (
   <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
     <h2 className="text-2xl font-bold mb-4">Order Details</h2>
     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -142,7 +166,6 @@ const OrderDetails: React.FC<{ items: IOrderItem[] }> = ({ items }) => (
     </div>
   </div>
 );
-
 const OrderSummary: React.FC<{
   totalPrice: number;
   paymentMethod: string;
@@ -164,17 +187,25 @@ const OrderSummary: React.FC<{
 
 const OrderStatus: React.FC<{ status: string }> = ({ status }) => {
   const stages = [
-    { icon: FaBox, label: "Order Placed", completed: true },
-    { icon: BiPackage, label: "Packed", completed: true },
+    {
+      icon: FaBox,
+      label: "Order Placed",
+      completed: status === "Pending" || status === "Confirmed",
+    },
+    {
+      icon: BiPackage,
+      label: "Packed",
+      completed: status === "Confirmed" || status === "Processing",
+    },
     {
       icon: FaTruck,
       label: "In Transit",
-      completed: status === "Shipped" || status === "Delivered",
+      completed: status === "Processing" || status === "Shipped",
     },
     {
       icon: FaClock,
       label: "Out for Delivery",
-      completed: status === "Delivered",
+      completed: status === "Shipped" || status === "Delivering",
     },
     { icon: FaCheck, label: "Delivered", completed: status === "Delivered" },
   ];

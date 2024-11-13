@@ -1,14 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store/store";
-import { deleteOrder, getOrders } from "../../../features/order/orderSlice";
+import {
+  confirmOrderByAdmin,
+  getOrders,
+} from "../../../features/order/orderSlice";
 import { Modal } from "../../../components/ui/Modal";
-import { useFormik } from "formik";
-import * as yup from "yup";
 import { BsSearch } from "react-icons/bs";
 import { ImSpinner3 } from "react-icons/im";
 import Table from "../../../components/ui/Table";
 import { IOrder } from "../../../types/order.type";
+import axios from "axios";
+import axiosInstance from "../../../utils/axiosConfig";
 
 const OrderManagement = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -16,12 +19,6 @@ const OrderManagement = () => {
   const [currentOrder, setCurrentOrder] = useState<IOrder | null>(null);
   const orderState = useSelector((state: RootState) => state.orderReducer);
   const { isLoading, orders } = orderState;
-
-  const handleDeleteOrder = (ids: string[]) => {};
-
-  useEffect(() => {
-    dispatch(getOrders());
-  }, [dispatch]); // Ensure this effect only runs once on mount
 
   const closeModal = () => {
     setIsModalOpen(false);
@@ -38,49 +35,24 @@ const OrderManagement = () => {
     status: "",
   });
 
-  const formik = useFormik<IOrder>({
-    initialValues: currentOrder || {
-      _id: "",
-      user: "",
-      orderItems: [],
-      totalPrice: 0,
-      status: "Pending",
-      paymentMethod: "Credit Card",
-      shippingAddress: {
-        province: "",
-        district: "",
-        ward: "",
-        detail: "",
-        name: "",
-        phone: "",
-      },
-      order_code: "",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    enableReinitialize: true, // Reinitialize form when currentOrder changes
-    validationSchema: yup.object({
-      order_code: yup.string().required("Order Number is required"),
-      shippingAddress: yup.object({
-        name: yup.string().required("Customer Name is required"),
-        detail: yup.string().required("Shipping Address is required"),
-      }),
-      status: yup.string().required("Status is required"),
-    }),
-    onSubmit: (values) => {
-      console.log("Form values:", values);
-      // Handle form submission
-      closeModal();
-    },
-  });
+  useEffect(() => {
+    dispatch(getOrders());
+  }, [dispatch]); // Ensure this effect only runs once on mount
 
-  const handleInputChange = (e: any) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { value, name } = e.target;
+    setSearchField({ ...searchField, [name]: value });
   };
 
-  const handleConfirm = () => {
-    
-  }
+  const handleConfirm = async (order: any) => {
+    setCurrentOrder(order);
+    if (currentOrder) {
+      dispatch(confirmOrderByAdmin(currentOrder._id));
+      dispatch(getOrders()); // Refresh the orders list after confirmation
+    }
+  };
 
   return (
     <div className="container mx-auto p-6 bg-gray-100 min-h-screen">
@@ -138,12 +110,11 @@ const OrderManagement = () => {
       {/* Table */}
       <div>
         <Table
-          onConfirm={handleConfirm}
+          onConfirm={(order: any) => handleConfirm(order)}
           selectedItems={[]}
           onSelectItem={() => {}}
           onSort={() => {}}
           onEdit={(order: IOrder) => openModal(order)}
-          onDelete={(id: string[]) => handleDeleteOrder(id)}
           onDeleteSelected={() => {}}
           itemsPerPage={10}
           sortBy=""
@@ -162,10 +133,8 @@ const OrderManagement = () => {
         isOpen={isModalOpen}
         closeModal={closeModal}
         title={""}
-        onSubmit={formik.handleSubmit}
-        submitText={`${
-          formik.values.order_code ? "View Order" : "Create Order"
-        }`}
+        onSubmit={() => {}} // No form submission needed
+        submitText={"View Order"}
         cancelText="Cancel"
         className={
           "inline-block w-full max-w-4xl p-6 my-8 overflow-hidden text-left align-middle transition-all transform bg-white shadow-xl rounded-2xl overflow-y-auto max-h-[90vh]"
@@ -178,51 +147,32 @@ const OrderManagement = () => {
             </h3>
           </div>
 
-          <form onSubmit={formik.handleSubmit} className="space-y-6">
+          <div className="space-y-6">
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-sm text-gray-500">Order Number</label>
                 <input
                   type="text"
-                  name="order_code"
-                  value={formik.values.order_code}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
+                  value={currentOrder?.order_code || ""}
                   className="w-full border rounded px-2 py-1"
                   disabled
                 />
-                {formik.touched.order_code && formik.errors.order_code ? (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.order_code}
-                  </div>
-                ) : null}
               </div>
               <div>
                 <label className="text-sm text-gray-500">Customer Name</label>
                 <input
                   type="text"
-                  name="shippingAddress.name"
-                  value={formik.values.shippingAddress.name}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
+                  value={currentOrder?.shippingAddress.name || ""}
                   className="w-full border rounded px-2 py-1"
                   disabled
                 />
-                {formik.touched.shippingAddress?.name &&
-                formik.errors.shippingAddress?.name ? (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.shippingAddress.name}
-                  </div>
-                ) : null}
               </div>
               <div>
                 <label className="text-sm text-gray-500">Status</label>
                 <select
-                  name="status"
-                  value={formik.values.status}
-                  onChange={formik.handleChange}
-                  onBlur={formik.handleBlur}
+                  value={currentOrder?.status || ""}
                   className="w-full border rounded px-2 py-1"
+                  disabled
                 >
                   <option value="Pending">Pending</option>
                   <option value="Processing">Processing</option>
@@ -230,11 +180,6 @@ const OrderManagement = () => {
                   <option value="Delivered">Delivered</option>
                   <option value="Cancelled">Cancelled</option>
                 </select>
-                {formik.touched.status && formik.errors.status ? (
-                  <div className="text-red-500 text-sm">
-                    {formik.errors.status}
-                  </div>
-                ) : null}
               </div>
             </div>
 
@@ -259,7 +204,7 @@ const OrderManagement = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {formik.values.orderItems.map((item, index) => (
+                    {currentOrder?.orderItems.map((item, index) => (
                       <tr key={index}>
                         <td className="px-4 py-2">
                           {item.product.productName}
@@ -284,21 +229,12 @@ const OrderManagement = () => {
               <label className="text-sm text-gray-500">Shipping Address</label>
               <input
                 type="text"
-                name="shippingAddress.detail"
-                value={formik.values.shippingAddress.detail}
-                onChange={formik.handleChange}
-                onBlur={formik.handleBlur}
+                value={currentOrder?.shippingAddress.detail || ""}
                 className="w-full border rounded px-2 py-1"
                 disabled
               />
-              {formik.touched.shippingAddress?.detail &&
-              formik.errors.shippingAddress?.detail ? (
-                <div className="text-red-500 text-sm">
-                  {formik.errors.shippingAddress.detail}
-                </div>
-              ) : null}
             </div>
-          </form>
+          </div>
         </div>
       </Modal>
       {isLoading && (

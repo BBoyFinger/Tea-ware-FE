@@ -31,6 +31,7 @@ interface IOrderState {
   message: string;
   wards: any[];
   orderInfo: any; // Define a more specific type if possible
+  confirmOrder: any
 }
 
 const initialState: IOrderState = {
@@ -47,12 +48,21 @@ const initialState: IOrderState = {
   deletedOrder: null,
   createdOrder: null,
   orderInfo: null,
+  confirmOrder: null,
   message: "",
 };
 
 export const getOrders = createAsyncThunk("orders", async (_, thunkApi) => {
   try {
     return await orderServices.getOrders();
+  } catch (error) {
+    return thunkApi.rejectWithValue(error);
+  }
+});
+
+export const confirmOrderByAdmin = createAsyncThunk("orders/confirm-order", async (orderId: string, thunkApi) => {
+  try {
+    return await orderServices.confirmOrder(orderId);
   } catch (error) {
     return thunkApi.rejectWithValue(error);
   }
@@ -118,16 +128,6 @@ export const getAllWards = createAsyncThunk(
   }
 );
 
-// export const createOrder = createAsyncThunk(
-//   "create-Order",
-//   async (data: IOrder, thunkApi) => {
-//     try {
-//       return await orderServices.createOrder(data);
-//     } catch (error) {
-//       return thunkApi.rejectWithValue(error);
-//     }
-//   }
-// );
 
 export const createOrder = createAsyncThunk(
   "order/createOrder",
@@ -166,6 +166,17 @@ export const deleteOrder = createAsyncThunk(
     }
   }
 );
+
+export const cancelOrder = createAsyncThunk('orders/cancelOrder', async (orderId: string) => {
+  const response = await orderServices.cancelOrder(orderId);
+  return response.data; // Adjust based on your API response
+});
+
+export const updateOrderQuantity = createAsyncThunk('orders/updateOrderQuantity', async ({ orderId, itemId, newQuantity }: { orderId: string; itemId: string; newQuantity: number }) => {
+  const response = await orderServices.updateOrderQuantity(orderId, itemId, newQuantity);
+  return response.data; // Adjust based on your API response
+});
+
 
 const orderSlice = createSlice({
   name: "order",
@@ -262,8 +273,20 @@ const orderSlice = createSlice({
         state.isLoading = false;
         state.isSuccess = true;
         state.userOrders = action.payload;
+      }).addCase(getOrdersByUser.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload as string;
       })
-      .addCase(getOrdersByUser.rejected, (state, action) => {
+      .addCase(confirmOrderByAdmin.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(confirmOrderByAdmin.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.confirmOrder = action.payload;
+      })
+      .addCase(confirmOrderByAdmin.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload as string;
