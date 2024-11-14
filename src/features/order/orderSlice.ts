@@ -3,14 +3,6 @@ import { IOrder } from "../../types/order.type";
 import { orderServices } from "./orderService";
 import axios from "axios";
 
-let config = {
-  headers: {
-    "Content-Type": "application/json",
-    Token: "497989ae-9cc3-11ef-abbe-867a64c2e80d",
-    withCredentials: false,
-  },
-};
-
 interface IOrderState {
   provinces: any[];
   districts: any[];

@@ -89,8 +89,6 @@ const UserManagement = (props: Props) => {
     dispatch(searchUser(searchField));
   };
 
-  console.log(user);
-
   const handleEditUser = (user: any) => {
     formik.setValues({
       email: user.email,
