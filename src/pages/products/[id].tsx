@@ -17,6 +17,8 @@ import {
 import RelatedProducts from "../../components/RelatedProduct";
 import Context from "../../context";
 import { addCart, viewProductCart } from "../../features/auth/authSlice";
+import Comments from "../../components/Comment";
+import CommentSection from "../../components/CommentSession";
 
 const ProductDetailPage = () => {
   const context = useContext(Context);
@@ -154,37 +156,10 @@ const ProductDetailPage = () => {
         </div>
       </div>
 
-      {/* Reviews and Rating Section */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold mb-4">Customer Reviews</h2>
-        <div className="flex items-center mb-4">
-          {/* <div className="flex mr-2">{renderStars(product.rating)}</div>
-          <span className="text-gray-600">{product.} out of 5</span> */}
-        </div>
-        <div className="space-y-4">
-          {product?.reviews &&
-            product?.reviews.map((review, index) => (
-              <div key={index} className="border-b pb-4">
-                <div className="flex items-center mb-2">
-                  <div className="flex mr-2">{renderStars(review.rating)}</div>
-                  <span className="font-semibold">{review.user}</span>
-                </div>
-                <p className="text-gray-600">{review.comment}</p>
-              </div>
-            ))}
-        </div>
-        <button className="mt-4 bg-gray-200 text-gray-800 py-2 px-4 rounded hover:bg-gray-300 transition-colors duration-300">
-          Write a Review
-        </button>
-      </div>
-      <div
-        className="fb-post"
-        data-href="https://www.facebook.com/20531316728/posts/10154009990506729/"
-        data-width="500"
-        data-show-text="true"
-      >
-        Hello
-      </div>
+      {/* Reviews and Rating Comment Section */}
+      {/* <Comments productId={product?._id as string} /> */}
+      <CommentSection/> 
+
       {/* Related Products */}
       <RelatedProducts relatedProducts={productByCategory} />
     </div>
