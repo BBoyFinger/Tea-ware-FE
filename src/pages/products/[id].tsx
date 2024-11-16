@@ -157,8 +157,8 @@ const ProductDetailPage = () => {
       </div>
 
       {/* Reviews and Rating Comment Section */}
-      {/* <Comments productId={product?._id as string} /> */}
-      <CommentSection/> 
+      <Comments productId={product?._id as string} />
+      {/* <CommentSection/>  */}
 
       {/* Related Products */}
       <RelatedProducts relatedProducts={productByCategory} />
