@@ -33,9 +33,15 @@ const OrderManagement = () => {
     status: "",
   });
 
+  const [filteredOrders, setFilteredOrders] = useState<IOrder[]>(orders);
+
   useEffect(() => {
     dispatch(getOrders());
-  }, [dispatch]); // Ensure this effect only runs once on mount
+  }, [dispatch]);
+
+  useEffect(() => {
+    setFilteredOrders(orders);
+  }, [orders]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -48,8 +54,18 @@ const OrderManagement = () => {
     setCurrentOrder(order);
     if (currentOrder) {
       await dispatch(confirmOrderByAdmin(currentOrder._id));
-      await dispatch(getOrders()); // Refresh the orders list after confirmation
+      await dispatch(getOrders());
     }
+  };
+
+  const handleSearch = () => {
+    const filtered = orders.filter((order: IOrder) => {
+      const matchesStatus = searchField.status
+        ? order.status === searchField.status
+        : true;
+      return matchesStatus;
+    });
+    setFilteredOrders(filtered);
   };
 
   return (
@@ -60,23 +76,6 @@ const OrderManagement = () => {
       {/* Search Field */}
       <div className="max-w-md">
         <div className="mb-4 flex flex-col gap-4">
-          <div className="flex items-center gap-4">
-            <label
-              htmlFor="searchName"
-              className="min-w-[100px] text-sm text-left font-medium text-gray-700 mb-1"
-            >
-              Search Order
-            </label>
-            <input
-              type="text"
-              id="customerName"
-              name="name"
-              value={searchField.name}
-              onChange={handleInputChange}
-              className="w-full px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
-              placeholder="Enter name"
-            />
-          </div>
           <div className="flex items-center gap-4">
             <label
               htmlFor="category"
@@ -90,6 +89,7 @@ const OrderManagement = () => {
               onChange={handleInputChange}
               className="w-full px-2 py-1 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
             >
+              <option value="">All</option>
               <option value="Pending">Pending</option>
               <option value="Processing">Processing</option>
               <option value="Shipped">Shipped</option>
@@ -101,7 +101,10 @@ const OrderManagement = () => {
       </div>
       {/* Button */}
       <div className="flex items-center justify-end mb-2 gap-4">
-        <button className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center">
+        <button
+          onClick={handleSearch}
+          className="bg-blue-500 text-white px-3 py-1 rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center"
+        >
           <BsSearch className="mr-2" /> Search
         </button>
       </div>
@@ -124,14 +127,14 @@ const OrderManagement = () => {
             { key: "totalPrice", label: "Total", sortable: true },
             { key: "createdAt", label: "Date", sortable: true },
           ]}
-          data={orders}
+          data={filteredOrders} // Use filtered orders
         />
       </div>
       <Modal
         isOpen={isModalOpen}
         closeModal={closeModal}
         title={""}
-        onSubmit={() => {}} // No form submission needed
+        onSubmit={() => {}}
         submitText={"View Order"}
         cancelText="Cancel"
         className={

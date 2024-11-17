@@ -8,6 +8,7 @@ import { AppDispatch, RootState } from "../../../store/store";
 import {
   createProduct,
   deleteProduct,
+  fetchProducts,
   getProducts,
   resetProductState,
   setSearchField,
@@ -21,7 +22,7 @@ import { FiPlus } from "react-icons/fi";
 import { toast } from "react-toastify";
 import { uploadImageProduct } from "../../../utils/uploadImage";
 import { ImSpinner3 } from "react-icons/im";
-import Pagination from "../../../components/ui/Pagination";
+// import Pagination from "../../../components/ui/Pagination";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { ICategory } from "../../../types/category.types";
@@ -74,16 +75,20 @@ const ProductManagement = () => {
     message,
     isLoading,
     totalPages,
+    currentPage,
   } = productState;
   const itemsPerPage = 10;
-  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
-    const query = `page=${currentPage}&limit=${itemsPerPage}`;
-    dispatch(getProducts(query));
+    dispatch(fetchProducts(1));
+    // dispatch(getProducts(""));
     dispatch(getCategories(""));
     dispatch(resetProductState());
-  }, [dispatch, currentPage]);
+  }, [dispatch]);
+
+  const handlePageChange = (newPage: number) => {
+    dispatch(fetchProducts(newPage));
+  };
 
   const formik = useFormik<IProductPayload>({
     initialValues: {
@@ -257,10 +262,6 @@ const ProductManagement = () => {
     await dispatch(getProducts(payload));
   };
 
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
-
   return (
     <div className="container mx-auto p-6 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-gray-800">
@@ -312,17 +313,11 @@ const ProductManagement = () => {
           selectedItems={selectedProduct}
           itemsPerPage={itemsPerPage}
           onDelete={handleDelete}
+          onPageChange={handlePageChange}
           onEdit={(product) => openModal(product)}
           onSort={() => {}}
           onDeleteSelected={handleDeleteProductSelected}
           onSelectItem={handleSelectedProduct}
-        />
-
-        <Pagination
-          currentPage={currentPage}
-          totalItems={products.length}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
         />
       </div>
       <div>

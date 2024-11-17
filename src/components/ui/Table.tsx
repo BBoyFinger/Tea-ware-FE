@@ -22,10 +22,11 @@ interface TableProps {
   selectedItems: string[];
   onSort: (key: string) => void;
   onEdit: (item: any) => void;
-  onConfirm?: (item: any) => void; // Make onConfirm optional
+  onConfirm?: (item: any) => void;
   onDelete?: (id: string[]) => void;
   onDeleteSelected: () => void;
   onSelectItem: (id: string) => void;
+  onPageChange?: (page: number) => void;
   itemsPerPage: number;
 }
 
@@ -35,10 +36,11 @@ function Table({
   sortBy,
   sortOrder,
   selectedItems,
+  onPageChange,
   onSort,
   onEdit,
   onDelete,
-  onConfirm, // Destructure onConfirm
+  onConfirm,
   onDeleteSelected,
   onSelectItem,
   itemsPerPage,
@@ -234,13 +236,12 @@ function Table({
         </tbody>
       </table>
       {/* Pagination */}
-
-      {/* <Pagination
+      <Pagination
         currentPage={currentPage}
         totalItems={data.length}
         itemsPerPage={itemsPerPage}
         onPageChange={paginate}
-      /> */}
+      />
       {selectedItems.length > 0 && onDeleteSelected && (
         <div className="mt-4 flex justify-end">
           <button

@@ -1,6 +1,7 @@
 import { createSlice, createAsyncThunk, createAction } from "@reduxjs/toolkit";
 import { IProduct } from "../../types/product.types";
 import { productService } from "./productService";
+import axiosInstance from "../../utils/axiosConfig";
 
 interface IProductState {
   product: IProduct | null;
@@ -25,6 +26,7 @@ interface IProductState {
   isError: boolean;
   isSuccess: boolean;
   message: string;
+  totalProducts: number;
 }
 
 const initialState: IProductState = {
@@ -48,9 +50,19 @@ const initialState: IProductState = {
   featuredProduct: null,
   newArrivalProduct: null,
   message: "",
-  totalPages: 5,
+  totalProducts: 0,
+  totalPages: 0,
   currentPage: 1,
 };
+
+export const fetchProducts = createAsyncThunk(
+  'products/fetchProducts',
+  async (page: number) => {
+    const limit = page === 1 ? 15 : 1000; // First page 10, second page all remaining
+    const response = await axiosInstance(`/products?page=${page}&limit=${limit}`);
+    return response.data;
+  }
+);
 
 export const getProducts = createAsyncThunk(
   "get-products",
@@ -333,6 +345,19 @@ const productSlice = createSlice({
         state.isSuccess = false;
         state.isLoading = false;
         state.message = action.error.message as string;
+      }).addCase(fetchProducts.pending, (state) => {
+        state.isLoading = true;
+      })
+      .addCase(fetchProducts.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.products = action.payload.data;
+        state.totalProducts = action.payload.totalProducts;
+        state.totalPages = action.payload.totalPages;
+        state.currentPage = action.payload.currentPage;
+      })
+      .addCase(fetchProducts.rejected, (state, action) => {
+        state.isLoading = false;
+        state.message = action.error.message || '';
       })
       .addCase(resetProductState, () => initialState);
   },
