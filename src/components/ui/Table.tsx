@@ -58,6 +58,13 @@ function Table({
   // Pagination function
   const paginate = (pageNumber: number) => setCurrentPage(pageNumber);
 
+  // Handle print order
+  const handlePrintOrder = (order: any) => {
+    // Implement your print logic here
+    console.log("Printing order:", order);
+    // For example, open a new window with order details
+  };
+
   return (
     <div className="overflow-x-auto">
       <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
@@ -201,6 +208,20 @@ function Table({
                         </div>
                       )}
                     </div>
+                    {(item.status === "Processing" ||
+                      item.status === "Shipping") && (
+                      <div className="relative group">
+                        <button
+                          onClick={() => handlePrintOrder(item)}
+                          className="text-gray-600 hover:text-gray-900 ml-3"
+                        >
+                          Print Order
+                        </button>
+                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-md p-1">
+                          Print
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   <div className="flex gap-3">
