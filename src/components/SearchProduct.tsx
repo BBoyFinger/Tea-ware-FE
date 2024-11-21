@@ -13,19 +13,21 @@ const ProductSearch = () => {
   const { searchProducts } = productState;
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
   const [isFocused, setIsFocused] = useState(false);
-  const inputRef = useRef(null);
-
-
-  useEffect(() => {
-    if (searchTerm.length > 0) {
-      dispatch(searchProduct(searchTerm));
-    }
-  }, [searchTerm]);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    const handleKeyDown = (event: any) => {
+    const delayDebounceFn = setTimeout(() => {
+      if (searchTerm.length > 0) {
+        dispatch(searchProduct(searchTerm));
+      }
+    }, 300);
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchTerm, dispatch]);
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape" && isFocused) {
         setIsFocused(false);
         setSearchTerm("");
@@ -35,21 +37,19 @@ const ProductSearch = () => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [isFocused]);
 
-  const handleInputChange = (e: any) => {
-    const { value } = e.target;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
   const handleClearInput = () => {
     setSearchTerm("");
-    setSuggestions([]);
-
-    // inputRef.current.focus();
+    if (inputRef.current) {
+      inputRef.current.focus();
+    }
   };
 
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    // Implement search logic here
     console.log("Searching for:", searchTerm);
   };
 
@@ -66,7 +66,7 @@ const ProductSearch = () => {
             onBlur={() => setTimeout(() => setIsFocused(false), 200)}
             placeholder="Search products..."
             aria-label="Search products"
-            className=" w-full xl:min-w-96 py-2 px-3 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
+            className="w-full xl:min-w-96 py-2 px-3 pr-12 text-black border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 ease-in-out shadow-sm"
           />
           {searchTerm && (
             <button
@@ -88,19 +88,19 @@ const ProductSearch = () => {
         </div>
 
         {isFocused && searchProducts.length > 0 ? (
-          <div className="absolute min-h-[420px] w-full z-[9999] bg-white left-0 top-[95px] py-4 px-3 ">
-            <div className="container text-center gap-3 mx-auto grid grid-cols-3 lg:grid-cols-8 items-center justify-center ">
+          <div className="absolute min-h-[420px] w-full z-[9999] bg-white left-0 top-[95px] py-4 px-3">
+            <div className="container text-center gap-3 mx-auto grid grid-cols-3 lg:grid-cols-8 items-center justify-center">
               {searchProducts.map((product: IProduct) => (
                 <Link
                   to={`products/${product._id}`}
                   key={product._id}
                   onClick={scrollTop}
-                  className="leading-5 flex gap-3 flex-col justify-center items-center group  font-normal transition-transform duration-300 transform hover:scale-105"
+                  className="leading-5 flex gap-3 flex-col justify-center items-center group font-normal transition-transform duration-300 transform hover:scale-105"
                 >
-                  <div className="">
+                  <div>
                     <img
-                      src={product.images && product?.images[0]?.url}
-                      alt={product.images && product?.images[0]?.title}
+                      src={product.images && product.images[0]?.url}
+                      alt={product.images && product.images[0]?.title}
                       className="lg:w-full lg:h-auto w-[60px] h-[60px] object-contain rounded-3xl"
                     />
                   </div>
@@ -114,8 +114,8 @@ const ProductSearch = () => {
             </div>
           </div>
         ) : isFocused && searchProducts.length === 0 ? (
-          <div className="absolute min-h-[420px] w-full z-[9999] bg-white left-0 top-[95px] py-4 px-3 ">
-            <div className="container flex items-center justify-center ">
+          <div className="absolute min-h-[420px] w-full z-[9999] bg-white left-0 top-[95px] py-4 px-3">
+            <div className="container flex items-center justify-center">
               <p className="text-red-600">No product found!</p>
             </div>
           </div>

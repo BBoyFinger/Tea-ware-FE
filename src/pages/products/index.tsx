@@ -161,6 +161,7 @@ const ProductListingPage = () => {
                 value={minPrice}
                 onChange={(e) => setMinPrice(e.target.value)}
                 className="py-2 px-4 rounded border border-gray-300"
+                placeholder="$"
               />
               <label htmlFor="maxPrice" className="ml-4 mr-2">
                 Max Price:
@@ -171,6 +172,7 @@ const ProductListingPage = () => {
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
                 className="py-2 px-4 rounded border border-gray-300"
+                placeholder="$"
               />
               <button
                 onClick={handlePriceFilter}

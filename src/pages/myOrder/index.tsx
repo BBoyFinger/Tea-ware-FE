@@ -142,7 +142,7 @@ const OrderDetails: React.FC<{
           />
           <div className="flex-1">
             <h3 className="font-semibold text-lg">
-              {item.product.productName}
+              {item.product?.productName}
             </h3>
             <p className="text-gray-600">Quantity: {item.quantity}</p>
             <p className="text-gray-600">Price: ${item.price.toFixed(2)}</p>
