@@ -5,6 +5,7 @@ import Pagination from "./Pagination";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { GiConfirmed } from "react-icons/gi";
+import { IoPrintOutline } from "react-icons/io5";
 
 interface TableColumn {
   key: string;
@@ -208,20 +209,6 @@ function Table({
                         </div>
                       )}
                     </div>
-                    {(item.status === "Processing" ||
-                      item.status === "Shipping") && (
-                      <div className="relative group">
-                        <button
-                          onClick={() => handlePrintOrder(item)}
-                          className="text-gray-600 hover:text-gray-900 ml-3"
-                        >
-                          Print Order
-                        </button>
-                        <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-md p-1">
-                          Print
-                        </span>
-                      </div>
-                    )}
                   </div>
                 ) : (
                   <div className="flex gap-3">
@@ -241,13 +228,30 @@ function Table({
                     <div className="relative group">
                       <button
                         onClick={() => onEdit(item)}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
+                        className="text-blue-600 hover:text-blue-900"
                       >
                         <FiEdit />
                       </button>
                       <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-md p-1">
                         Edit
                       </span>
+                    </div>
+                    
+
+                    <div className="relative group">
+                      {item.status === "Processing" && (
+                        <>
+                          <button
+                            onClick={() => handlePrintOrder(item)}
+                            className="text-red-600 hover:text-gray-900"
+                          >
+                            <IoPrintOutline />
+                          </button>
+                          <span className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 hidden group-hover:block bg-gray-800 text-white text-xs rounded-md p-1">
+                            Print
+                          </span>
+                        </>
+                      )}
                     </div>
                   </div>
                 )}

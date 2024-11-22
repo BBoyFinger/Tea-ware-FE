@@ -79,7 +79,18 @@ const Dashboard = () => {
 
   const revenueData = {
     labels: [
-      "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
     ],
     datasets: [
       {
@@ -92,11 +103,14 @@ const Dashboard = () => {
   };
 
   // Calculate user analytics
-  const activeUsers = users.filter(user => user.status === "Active").length;
-  const newUsers = users.filter(user => {
+  const activeUsers = users.filter((user) => user.status === "Active").length;
+  const newUsers = users.filter((user) => {
     const createdAt = new Date(user.createdAt);
     const now = new Date();
-    return createdAt.getMonth() === now.getMonth() && createdAt.getFullYear() === now.getFullYear();
+    return (
+      createdAt.getMonth() === now.getMonth() &&
+      createdAt.getFullYear() === now.getFullYear()
+    );
   }).length;
   const returningUsers = users.length - newUsers;
 
@@ -164,12 +178,14 @@ const Dashboard = () => {
             </div>
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-lg font-semibold mb-4">User Analytics</h2>
-              <Doughnut
-                data={userAnalyticsData}
-                options={{ responsive: true }}
-                width={50}
-                height={50}
-              />
+              <div className=" w-[380px] h-[380px] mx-auto">
+             
+                {/* Đặt kích thước biểu đồ */}
+                <Doughnut
+                  data={userAnalyticsData}
+                  options={{ responsive: true }}
+                />
+              </div>
             </div>
           </div>
         </div>
