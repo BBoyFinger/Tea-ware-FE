@@ -15,7 +15,6 @@ const createProduct = async (data: IProduct) => {
 };
 
 const editProduct = async (data: IProduct) => {
-  console.log(data);
   const response = await axiosInstance.put(`/product/${data._id}`, {
     productName: data.productName,
     price: data.price,

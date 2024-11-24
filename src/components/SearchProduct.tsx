@@ -50,7 +50,6 @@ const ProductSearch = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Searching for:", searchTerm);
   };
 
   return (

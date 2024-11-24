@@ -2,7 +2,7 @@
 import Header from "./components/Header";
 import { Outlet } from "react-router-dom";
 import Footer from "./components/Footer";
-import { ToastContainer } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { useEffect } from "react";
 import axiosInstance from "./utils/axiosConfig";
@@ -28,7 +28,7 @@ function App() {
         dispatch(setUserDetails(response.data.data));
       }
     } catch (error: any) {
-      console.log(error);
+      toast.error(error);
     }
   };
 

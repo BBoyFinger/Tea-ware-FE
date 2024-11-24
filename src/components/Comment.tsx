@@ -43,7 +43,7 @@ const Comments: React.FC<CommentsProps> = ({ productId }) => {
   const [reply, setReply] = useState<Record<string, string>>({});
   const [error, setError] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
   const [replyTo, setReplyTo] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [addingComment, setAddingComment] = useState<boolean>(false);
@@ -96,10 +96,7 @@ const Comments: React.FC<CommentsProps> = ({ productId }) => {
       setError("Reply field cannot be empty");
       return;
     }
-  
-    console.log("Replying to comment:", commentId);
-    console.log("Product ID:", productId);
-  
+
     try {
       const response = await axiosInstance.post(`/reply/${commentId}`, {
         userId: user?._id,
@@ -136,7 +133,7 @@ const Comments: React.FC<CommentsProps> = ({ productId }) => {
     if (!window.confirm("Are you sure you want to delete this comment?")) {
       return;
     }
-    
+
     try {
       await axiosInstance.delete(`/comments/${commentId}/replies/${replyId}`);
       setComments(
@@ -144,7 +141,9 @@ const Comments: React.FC<CommentsProps> = ({ productId }) => {
           comment._id === commentId
             ? {
                 ...comment,
-                replies: comment.replies.filter((reply) => reply._id !== replyId),
+                replies: comment.replies.filter(
+                  (reply) => reply._id !== replyId
+                ),
               }
             : comment
         )

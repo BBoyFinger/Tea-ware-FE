@@ -14,7 +14,6 @@ const VnPaySuccess: React.FC = () => {
         const { data } = await axios.get(
           `http://localhost:8080/api/vnpay_return${query}`
         );
-        console.log(data);
       } catch (error) {
         console.error("Error fetching VNPay result:", error);
       }
@@ -31,10 +30,16 @@ const VnPaySuccess: React.FC = () => {
         </span>
         <p className="mt-2 mb-5 text-2xl font-semibold">Order Success!</p>
         <div className="flex">
-          <Link to="/myOrder" className="btn text-lg border border-gray-300 px-5 py-2 text-gray-800 rounded-lg mr-4 hover:bg-gray-300 transition">
+          <Link
+            to="/myOrder"
+            className="btn text-lg border border-gray-300 px-5 py-2 text-gray-800 rounded-lg mr-4 hover:bg-gray-300 transition"
+          >
             Review your order
           </Link>
-          <Link to="/" className="btn text-lg border border-gray-300 px-5 py-2 text-gray-800 rounded-lg hover:bg-gray-300 transition">
+          <Link
+            to="/"
+            className="btn text-lg border border-gray-300 px-5 py-2 text-gray-800 rounded-lg hover:bg-gray-300 transition"
+          >
             Homepage
           </Link>
         </div>

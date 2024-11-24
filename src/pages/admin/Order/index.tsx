@@ -37,6 +37,7 @@ const OrderManagement = () => {
   });
 
   const [filteredOrders, setFilteredOrders] = useState<IOrder[]>(orders);
+  const [confirmedOrders, setConfirmedOrders] = useState<string[]>([]);
 
   useEffect(() => {
     dispatch(getOrders());
@@ -53,11 +54,21 @@ const OrderManagement = () => {
     setSearchField({ ...searchField, [name]: value });
   };
 
-  const handleConfirm = async (order: any) => {
-    setCurrentOrder(order);
-    if (currentOrder) {
-      await dispatch(createdOrderGhn(currentOrder._id));
-      await dispatch(confirmOrderByAdmin(currentOrder._id));
+  // const handleConfirm = async (order: any) => {
+  //   setCurrentOrder(order);
+
+  //   if (currentOrder) {
+  //     await dispatch(createdOrderGhn(currentOrder._id));
+  //     await dispatch(confirmOrderByAdmin(currentOrder._id));
+  //     await dispatch(getOrders());
+  //   }
+  // };
+
+  const handleConfirm = async (order: IOrder) => {
+    if (!confirmedOrders.includes(order._id)) {
+      await dispatch(createdOrderGhn(order._id));
+      await dispatch(confirmOrderByAdmin(order._id));
+      setConfirmedOrders((prev) => [...prev, order._id]);
       await dispatch(getOrders());
     }
   };
@@ -77,7 +88,6 @@ const OrderManagement = () => {
       const response = await axiosInstance.get(`/orders/print/${orderId}`);
       const orderData = response.data;
 
-      console.log("Order data received:", orderData);
 
       // const printWindow = window.open("", "_blank");
       // if (printWindow) {
@@ -162,7 +172,7 @@ const OrderManagement = () => {
       {/* Table */}
       <div>
         <Table
-          onConfirm={(order: any) => handleConfirm(order)}
+          onConfirm={handleConfirm}
           selectedItems={[]}
           onSelectItem={() => {}}
           onSort={() => {}}
@@ -180,6 +190,7 @@ const OrderManagement = () => {
             { key: "createdAt", label: "Date", sortable: true },
           ]}
           data={filteredOrders} // Use filtered orders
+          confirmedOrders={confirmedOrders}
         />
       </div>
       <Modal

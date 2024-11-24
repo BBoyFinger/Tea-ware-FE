@@ -15,7 +15,6 @@ const VnPaySuccess: React.FC = () => {
           `http://localhost:5555/api/payment/vnpay_return${query}`
         );
         // Handle the response data if needed
-        console.log(data);
       } catch (error) {
         console.error("Error fetching VNPay result:", error);
       }

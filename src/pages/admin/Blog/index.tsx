@@ -92,7 +92,6 @@ const BlogManagement = () => {
   };
 
   const handleSearch = async () => {
-    console.log("hello");
     const payload = {
       title: searchField.title,
     };

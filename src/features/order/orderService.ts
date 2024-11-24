@@ -19,7 +19,6 @@ const getOrdersByUser = async (id: string) => {
 
 const confirmOrder = async (orderId: string) => {
   const response = await axiosInstance.patch(`/orders/${orderId}/confirm`);
-  console.log(response.data.data);
   return response.data.data;
 };
 

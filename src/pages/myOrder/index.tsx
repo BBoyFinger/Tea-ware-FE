@@ -24,7 +24,6 @@ const MyOrder: React.FC = () => {
   }, [dispatch, user]);
 
   const openModal = (orderId: string) => {
-    console.log(orderId);
     setSelectedOrderId(orderId);
     setIsModalOpen(true);
   };
@@ -35,7 +34,6 @@ const MyOrder: React.FC = () => {
   };
 
   const handleCancelOrder = async () => {
-    console.log(selectedOrderId);
     if (selectedOrderId) {
       await dispatch(deleteOrder(selectedOrderId));
       await dispatch(getOrdersByUser(user?._id as string));
@@ -51,8 +49,6 @@ const MyOrder: React.FC = () => {
       </div>
     );
   }
-
-  console.log(orders);
 
   return (
     <div className="min-h-screen bg-gray-100 p-4 md:p-8">
