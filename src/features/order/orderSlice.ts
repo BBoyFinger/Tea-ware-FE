@@ -12,6 +12,7 @@ interface IOrderState {
   isLoading: boolean;
   updatedOrder: any;
   deletedOrder: any;
+  createdOrderGhn: any;
   createdOrder: any;
   isError: boolean;
   isSuccess: boolean;
@@ -34,6 +35,7 @@ const initialState: IOrderState = {
   updatedOrder: null,
   deletedOrder: null,
   createdOrder: null,
+  createdOrderGhn: null,
   orderInfo: null,
   confirmOrder: null,
   message: "",
@@ -52,6 +54,17 @@ export const confirmOrderByAdmin = createAsyncThunk(
   async (orderId: string, thunkApi) => {
     try {
       return await orderServices.confirmOrder(orderId);
+    } catch (error) {
+      return thunkApi.rejectWithValue(error);
+    }
+  }
+);
+
+export const createdOrderGhn = createAsyncThunk(
+  "orders/update-orderGhn",
+  async (id: string, thunkApi) => {
+    try {
+      return await orderServices.createOrderGhn(id);
     } catch (error) {
       return thunkApi.rejectWithValue(error);
     }
@@ -279,6 +292,19 @@ const orderSlice = createSlice({
         state.deletedOrder = action.payload;
       })
       .addCase(deleteOrder.rejected, (state, action) => {
+        state.isLoading = false;
+        state.isError = true;
+        state.message = action.payload as string;
+      })
+      .addCase(createdOrderGhn.pending, (state) => {
+        state.isLoading = false;
+      })
+      .addCase(createdOrderGhn.fulfilled, (state, action) => {
+        state.isLoading = false;
+        state.isSuccess = true;
+        state.createdOrderGhn = action.payload;
+      })
+      .addCase(createdOrderGhn.rejected, (state, action) => {
         state.isLoading = false;
         state.isError = true;
         state.message = action.payload as string;

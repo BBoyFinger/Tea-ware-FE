@@ -28,12 +28,6 @@ const SpecialProduct = ({
           >
             <h2>{title}</h2>
           </Link>
-          <Link
-            to=""
-            className="text-base text-[#a66920] cursor-pointer hover:underline uppercase"
-          >
-            <p>View More</p>
-          </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 ">
           {isLoading

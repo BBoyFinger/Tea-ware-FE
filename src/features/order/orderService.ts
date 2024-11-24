@@ -6,6 +6,12 @@ const getOrders = async () => {
   return response.data.data;
 };
 
+const createOrderGhn = async (id: string) => {
+  const response = await axiosInstance.post(`/update/${id}`);
+  
+  return response.data.data;
+};
+
 const getOrdersByUser = async (id: string) => {
   const response = await axiosInstance.get(`/orders/user/${id}`);
   return response.data.data;
@@ -13,6 +19,7 @@ const getOrdersByUser = async (id: string) => {
 
 const confirmOrder = async (orderId: string) => {
   const response = await axiosInstance.patch(`/orders/${orderId}/confirm`);
+  console.log(response.data.data);
   return response.data.data;
 };
 
@@ -47,4 +54,5 @@ export const orderServices = {
   deleteOrder,
   getOrdersByUser,
   confirmOrder,
+  createOrderGhn,
 };

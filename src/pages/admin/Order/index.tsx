@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../../store/store";
 import {
   confirmOrderByAdmin,
+  createdOrderGhn,
   getOrders,
 } from "../../../features/order/orderSlice";
 import { Modal } from "../../../components/ui/Modal";
@@ -10,6 +11,8 @@ import { BsSearch } from "react-icons/bs";
 import { ImSpinner3 } from "react-icons/im";
 import Table from "../../../components/ui/Table";
 import { IOrder } from "../../../types/order.type";
+import axios from "axios";
+import axiosInstance from "../../../utils/axiosConfig";
 
 const OrderManagement = () => {
   const dispatch: AppDispatch = useDispatch();
@@ -53,6 +56,7 @@ const OrderManagement = () => {
   const handleConfirm = async (order: any) => {
     setCurrentOrder(order);
     if (currentOrder) {
+      await dispatch(createdOrderGhn(currentOrder._id));
       await dispatch(confirmOrderByAdmin(currentOrder._id));
       await dispatch(getOrders());
     }
@@ -66,6 +70,53 @@ const OrderManagement = () => {
       return matchesStatus;
     });
     setFilteredOrders(filtered);
+  };
+
+  const handlePrintOrder = async (orderId: any) => {
+    try {
+      const response = await axiosInstance.get(`/orders/print/${orderId}`);
+      const orderData = response.data;
+
+      console.log("Order data received:", orderData);
+
+      // const printWindow = window.open("", "_blank");
+      // if (printWindow) {
+      //   printWindow.document.write(`
+      //     <html>
+      //       <head>
+      //         <title>Print Order</title>
+      //         <style>
+      //           body { font-family: Arial, sans-serif; margin: 20px; }
+      //           h1 { font-size: 24px; }
+      //           p { font-size: 18px; }
+      //           .order-details { margin-top: 20px; }
+      //         </style>
+      //       </head>
+      //       <body>
+      //         <h1>Order Details</h1>
+      //         <div class="order-details">
+      //           <p><strong>Order Number:</strong> ${orderData.order_code}</p>
+      //           <p><strong>Customer Name:</strong> ${
+      //             orderData.customer_name
+      //           }</p>
+      //           <p><strong>Address:</strong> ${orderData.shipping_address}</p>
+      //           <p><strong>Status:</strong> ${orderData.status}</p>
+      //           <p><strong>Total Price:</strong> $${orderData.total_price}</p>
+      //           <p><strong>Date:</strong> ${new Date(
+      //             orderData.created_at
+      //           ).toLocaleDateString()}</p>
+      //         </div>
+      //       </body>
+      //     </html>
+      //   `);
+      //   printWindow.document.close();
+      //   printWindow.focus();
+      //   printWindow.print();
+      //   printWindow.close();
+      // }
+    } catch (error) {
+      console.error("Error printing order:", error);
+    }
   };
 
   return (
@@ -118,6 +169,7 @@ const OrderManagement = () => {
           onEdit={(order: IOrder) => openModal(order)}
           onDeleteSelected={() => {}}
           itemsPerPage={10}
+          handlePrintOrder={(order: IOrder) => handlePrintOrder(order?._id)}
           sortBy=""
           columns={[
             { key: "order_code", label: "Order Number", sortable: true },

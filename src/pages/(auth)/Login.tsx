@@ -37,12 +37,18 @@ const Login = () => {
       try {
         const response = await axiosInstance.post("/signin", values);
         if (response?.data.success) {
+          // Store the access token in axios headers
+          axiosInstance.defaults.headers.common['Authorization'] = `Bearer ${response.data.accessToken}`;
+          
+          // Optionally, store the access token in local storage or context if needed
+          // localStorage.setItem('accessToken', response.data.accessToken);
+
           toast.success(response.data.message);
           navigate("/");
           userContext?.fetchUserDetails();
         }
       } catch (error: any) {
-        toast.error(error.response?.data.message);
+        toast.error(error.response?.data.message || 'Login failed');
       }
     },
   });
