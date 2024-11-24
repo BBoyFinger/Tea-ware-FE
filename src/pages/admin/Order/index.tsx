@@ -215,7 +215,7 @@ const OrderManagement = () => {
                 <label className="text-sm text-gray-500">Customer Name</label>
                 <input
                   type="text"
-                  value={currentOrder?.shippingAddress.name || ""}
+                  value={currentOrder?.shippingAddress?.name || ""}
                   className="w-full border rounded px-2 py-1"
                   disabled
                 />

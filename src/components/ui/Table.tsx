@@ -5,7 +5,10 @@ import Pagination from "./Pagination";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { GiConfirmed } from "react-icons/gi";
+
 import { BiPrinter } from "react-icons/bi";
+
+import { IoPrintOutline } from "react-icons/io5";
 
 interface TableColumn {
   key: string;
@@ -30,6 +33,7 @@ interface TableProps {
   onPageChange?: (page: number) => void;
   handlePrintOrder?: (order: any) => void;
   itemsPerPage: number;
+  confirmedOrders?: string[]; // Add this line
 }
 
 function Table({
@@ -47,6 +51,7 @@ function Table({
   onSelectItem,
   handlePrintOrder,
   itemsPerPage,
+  confirmedOrders, // Add this line
 }: TableProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const location = useLocation();
@@ -211,7 +216,12 @@ function Table({
                       <div className="relative group">
                         <button
                           onClick={() => onConfirm(item)}
-                          className="text-green-600 hover:text-green-900"
+                          className={`text-green-600 hover:text-green-900 ${
+                            confirmedOrders && confirmedOrders.includes(item.id)
+                              ? "opacity-50 cursor-not-allowed"
+                              : ""
+                          }`}
+                          disabled={confirmedOrders && confirmedOrders.includes(item.id)}
                         >
                           <GiConfirmed />
                         </button>
