@@ -2,6 +2,7 @@ import { createSlice, createAsyncThunk, PayloadAction } from "@reduxjs/toolkit";
 import { IOrder } from "../../types/order.type";
 import { orderServices } from "./orderService";
 import axios from "axios";
+import axiosInstance from "../../utils/axiosConfig";
 
 interface IOrderState {
   provinces: any[];
@@ -87,7 +88,7 @@ export const getAllProvinces = createAsyncThunk(
   "provinces/getAllProvinces",
   async (_, thunkAPI) => {
     try {
-      const response = await axios.get("http://localhost:8080/api/provinces");
+      const response = await axiosInstance.get("/provinces");
       return response.data.data;
     } catch (error: any) {
       return thunkAPI.rejectWithValue(
@@ -102,7 +103,7 @@ export const getAllDistricts = createAsyncThunk(
   "districts/getAllDistricts",
   async (provinceId: string, thunkAPI) => {
     try {
-      const response = await axios.get("http://localhost:8080/api/districts", {
+      const response = await axiosInstance.get("/districts", {
         params: { province_id: provinceId },
       });
       return response.data.data;
@@ -119,7 +120,7 @@ export const getAllWards = createAsyncThunk(
   "wards/getAllWards",
   async (districtId: any, thunkAPI) => {
     try {
-      const response = await axios.get("http://localhost:8080/api/wards", {
+      const response = await axiosInstance.get("/wards", {
         params: { district_id: districtId },
       });
       return response.data.data;
@@ -135,8 +136,8 @@ export const createOrder = createAsyncThunk(
   "order/createOrder",
   async (order: any, thunkAPI) => {
     try {
-      const { data } = await axios.post(
-        "http://localhost:8080/api/order",
+      const { data } = await axiosInstance.post(
+        "/order",
         order
       );
       localStorage.removeItem("cartItems");

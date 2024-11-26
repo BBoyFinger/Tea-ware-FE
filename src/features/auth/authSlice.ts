@@ -66,9 +66,7 @@ export const changePassword = createAsyncThunk(
     try {
       return await authService.changePassword(passwordData);
     } catch (error: any) {
-      return thunkApi.rejectWithValue(
-        error.response?.data?.message || error.message
-      );
+      return thunkApi.rejectWithValue(error);
     }
   }
 );

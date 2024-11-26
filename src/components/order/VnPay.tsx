@@ -6,6 +6,7 @@ import {
   removeCart,
   userAddCartCountNumber,
 } from "../../features/auth/authSlice";
+import axiosInstance from "../../utils/axiosConfig";
 
 const VnPay: React.FC = () => {
   const { orderInfo } = useSelector((state: RootState) => state.orderReducer);
@@ -19,8 +20,8 @@ const VnPay: React.FC = () => {
     };
 
     try {
-      const { data } = await axios.post(
-        "http://localhost:8080/api/payment",
+      const { data } = await axiosInstance.post(
+        "/payment",
         OrderPaid
       );
 

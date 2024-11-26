@@ -3,6 +3,7 @@ import React, { useEffect } from "react";
 import { AiOutlineCheck } from "react-icons/ai";
 import { useLocation } from "react-router-dom";
 import { Link } from "react-router-dom";
+import axiosInstance from "../../utils/axiosConfig";
 
 const VnPaySuccess: React.FC = () => {
   const location = useLocation();
@@ -11,9 +12,7 @@ const VnPaySuccess: React.FC = () => {
     const getResultVNPay = async () => {
       try {
         const query = location.search;
-        const { data } = await axios.get(
-          `http://localhost:8080/api/vnpay_return${query}`
-        );
+        const { data } = await axiosInstance.get(`/vnpay_return${query}`);
       } catch (error) {
         console.error("Error fetching VNPay result:", error);
       }

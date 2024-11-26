@@ -19,6 +19,8 @@ const ForgotPassword = () => {
     confirm: false,
   });
 
+  console.log("message nè: ", message);
+
   const formik = useFormik({
     initialValues: {
       currentPassword: "",
@@ -44,12 +46,13 @@ const ForgotPassword = () => {
           newPassword: values.newPassword,
         })
       );
+
       if (isError) {
-        toast.error(message);
+        toast.error("Error change password!");
       }
 
       if (isSuccess) {
-        toast.success(message);
+        toast.success("change password successfully!");
       }
       formik.resetForm();
     },

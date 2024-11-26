@@ -11,6 +11,8 @@ const Settings = () => {
     (state: RootState) => state.authReducer
   );
 
+  console.log("message nè: ", message);
+
   const formik = useFormik({
     initialValues: {
       currentPassword: "",

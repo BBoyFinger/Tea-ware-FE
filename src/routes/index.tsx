@@ -22,7 +22,6 @@ import BlogManagement from "../pages/admin/Blog";
 import BlogDetailsPage from "../pages/blog/[id]";
 import Checkout from "../pages/Checkout";
 import Settings from "../pages/admin/Setting";
-import LocationSelector from "../pages/Location";
 import VnPaySuccess from "../components/order/VnPaySuccess";
 import MyOrder from "../pages/myOrder";
 import MyProfile from "../pages/profile";
@@ -55,7 +54,7 @@ const router = createBrowserRouter([
           </PublicRoute>
         ),
       },
-      { path: "location", element: <LocationSelector /> },
+      { path: "products/:category", element: <ProductListingPage /> },
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "orderSuccess", element: <VnPaySuccess /> },
       {

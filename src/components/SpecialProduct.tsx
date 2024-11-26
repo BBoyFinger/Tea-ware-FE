@@ -23,10 +23,16 @@ const SpecialProduct = ({
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between py-[10px] ">
           <Link
-            to=""
+            to="/products"
             className="text-3xl font-light capitalize cursor-pointer hover:underline"
           >
             <h2>{title}</h2>
+          </Link>
+          <Link
+            to={`/products`}
+            className="text-3xl font-light text-[#a66920] uppercase cursor-pointer hover:underline"
+          >
+            <h2>View More</h2>
           </Link>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 ">

@@ -186,7 +186,7 @@ const ProductListingPage = () => {
               {filteredAndSortedProducts && filteredAndSortedProducts.length > 0 ? (
                 <ProductsList products={filteredAndSortedProducts} />
               ) : (
-                <div>No products available</div>
+                <div className="p-2 bg-white text-black">No products available</div>
               )}
             </div>
           </section>
