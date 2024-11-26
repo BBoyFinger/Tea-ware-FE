@@ -1,83 +1,61 @@
-import React, { useState } from "react";
+import React from "react";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { toast } from "react-toastify";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
 import { BiLoaderAlt } from "react-icons/bi";
+import { useDispatch, useSelector } from "react-redux";
+import { AppDispatch, RootState } from "../../store/store";
+import { changePassword } from "../../features/auth/authSlice";
 
 const ForgotPassword = () => {
-  const [formData, setFormData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-
-  const [errors, setErrors] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
-  });
-
-  const [showPasswords, setShowPasswords] = useState({
+  const dispatch: AppDispatch = useDispatch();
+  const { isLoading, isError, isSuccess, message } = useSelector(
+    (state: RootState) => state.authReducer
+  );
+  const [showPasswords, setShowPasswords] = React.useState({
     current: false,
     new: false,
     confirm: false,
   });
 
-  const [isLoading, setIsLoading] = useState(false);
+  const formik = useFormik({
+    initialValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
+    },
+    validationSchema: Yup.object({
+      currentPassword: Yup.string()
+        .required("Current password is required")
+        .min(6, "CurrentPassword must be at least 6 characters"),
+      newPassword: Yup.string()
+        .min(6, "Password must be at least 6 characters")
+        .required("New password is required"),
+      confirmPassword: Yup.string()
+        .oneOf([Yup.ref("newPassword"), undefined], "Passwords must match")
+        .required("Confirm password is required"),
+    }),
+    onSubmit: async (values) => {
+      // Simulate API call
+      await dispatch(
+        changePassword({
+          currentPassword: values.currentPassword,
+          newPassword: values.newPassword,
+        })
+      );
+      if (isError) {
+        toast.error(message);
+      }
 
-  const handleInputChange = (e: any) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+      if (isSuccess) {
+        toast.success(message);
+      }
+      formik.resetForm();
+    },
+  });
 
-    validateField(name, value);
-  };
-
-  const validateField = (name: any, value: any) => {
-    let newErrors = { ...errors };
-
-    switch (name) {
-      case "currentPassword":
-        newErrors.currentPassword =
-          value.length < 6 ? "Password must be at least 6 characters" : "";
-        break;
-      case "newPassword":
-        newErrors.newPassword =
-          value.length < 6 ? "New password must be at least 6 characters" : "";
-        if (formData.confirmPassword && value !== formData.confirmPassword) {
-          newErrors.confirmPassword = "Passwords do not match";
-        } else {
-          newErrors.confirmPassword = "";
-        }
-        break;
-      case "confirmPassword":
-        newErrors.confirmPassword =
-          value !== formData.newPassword ? "Passwords do not match" : "";
-        break;
-      default:
-        break;
-    }
-
-    setErrors(newErrors);
-  };
-
-  const handleSubmit = async (e: any) => {
-    e.preventDefault();
-    setIsLoading(true);
-
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false);
-      // Reset form after successful submission
-      setFormData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: "",
-      });
-    }, 2000);
-  };
-
-  const togglePasswordVisibility = (field: any) => {
+  const togglePasswordVisibility = (field: string) => {
     setShowPasswords((prev: any) => ({
       ...prev,
       [field]: !prev[field],
@@ -96,7 +74,7 @@ const ForgotPassword = () => {
           </p>
         </div>
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={formik.handleSubmit}>
           <div className="space-y-4">
             <div>
               <label
@@ -113,13 +91,20 @@ const ForgotPassword = () => {
                   autoComplete="current-password"
                   required
                   className={`appearance-none relative block w-full px-3 py-2 border ${
-                    errors.currentPassword
+                    formik.touched.currentPassword &&
+                    formik.errors.currentPassword
                       ? "border-red-500"
                       : "border-gray-300"
                   } rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200`}
-                  value={formData.currentPassword}
-                  onChange={handleInputChange}
-                  aria-invalid={errors.currentPassword ? "true" : "false"}
+                  value={formik.values.currentPassword}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  aria-invalid={
+                    formik.touched.currentPassword &&
+                    formik.errors.currentPassword
+                      ? "true"
+                      : "false"
+                  }
                   aria-describedby="current-password-error"
                 />
                 <button
@@ -134,14 +119,15 @@ const ForgotPassword = () => {
                   )}
                 </button>
               </div>
-              {errors.currentPassword && (
-                <p
-                  className="mt-2 text-sm text-red-600"
-                  id="current-password-error"
-                >
-                  {errors.currentPassword}
-                </p>
-              )}
+              {formik.touched.currentPassword &&
+                formik.errors.currentPassword && (
+                  <p
+                    className="mt-2 text-sm text-red-600"
+                    id="current-password-error"
+                  >
+                    {formik.errors.currentPassword}
+                  </p>
+                )}
             </div>
 
             <div>
@@ -159,11 +145,18 @@ const ForgotPassword = () => {
                   autoComplete="new-password"
                   required
                   className={`appearance-none relative block w-full px-3 py-2 border ${
-                    errors.newPassword ? "border-red-500" : "border-gray-300"
+                    formik.touched.newPassword && formik.errors.newPassword
+                      ? "border-red-500"
+                      : "border-gray-300"
                   } rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200`}
-                  value={formData.newPassword}
-                  onChange={handleInputChange}
-                  aria-invalid={errors.newPassword ? "true" : "false"}
+                  value={formik.values.newPassword}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  aria-invalid={
+                    formik.touched.newPassword && formik.errors.newPassword
+                      ? "true"
+                      : "false"
+                  }
                   aria-describedby="new-password-error"
                 />
                 <button
@@ -178,12 +171,12 @@ const ForgotPassword = () => {
                   )}
                 </button>
               </div>
-              {errors.newPassword && (
+              {formik.touched.newPassword && formik.errors.newPassword && (
                 <p
                   className="mt-2 text-sm text-red-600"
                   id="new-password-error"
                 >
-                  {errors.newPassword}
+                  {formik.errors.newPassword}
                 </p>
               )}
             </div>
@@ -203,13 +196,20 @@ const ForgotPassword = () => {
                   autoComplete="new-password"
                   required
                   className={`appearance-none relative block w-full px-3 py-2 border ${
-                    errors.confirmPassword
+                    formik.touched.confirmPassword &&
+                    formik.errors.confirmPassword
                       ? "border-red-500"
                       : "border-gray-300"
                   } rounded-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm transition-all duration-200`}
-                  value={formData.confirmPassword}
-                  onChange={handleInputChange}
-                  aria-invalid={errors.confirmPassword ? "true" : "false"}
+                  value={formik.values.confirmPassword}
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  aria-invalid={
+                    formik.touched.confirmPassword &&
+                    formik.errors.confirmPassword
+                      ? "true"
+                      : "false"
+                  }
                   aria-describedby="confirm-password-error"
                 />
                 <button
@@ -224,30 +224,25 @@ const ForgotPassword = () => {
                   )}
                 </button>
               </div>
-              {errors.confirmPassword && (
-                <p
-                  className="mt-2 text-sm text-red-600"
-                  id="confirm-password-error"
-                >
-                  {errors.confirmPassword}
-                </p>
-              )}
+              {formik.touched.confirmPassword &&
+                formik.errors.confirmPassword && (
+                  <p
+                    className="mt-2 text-sm text-red-600"
+                    id="confirm-password-error"
+                  >
+                    {formik.errors.confirmPassword}
+                  </p>
+                )}
             </div>
           </div>
 
           <div>
             <button
               type="submit"
-              disabled={
-                isLoading ||
-                Object.values(errors).some((error) => error) ||
-                !formData.currentPassword ||
-                !formData.newPassword ||
-                !formData.confirmPassword
-              }
+              disabled={formik.isSubmitting || !formik.isValid}
               className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
             >
-              {isLoading ? (
+              {formik.isSubmitting ? (
                 <BiLoaderAlt className="animate-spin h-5 w-5" />
               ) : (
                 "Change Password"
