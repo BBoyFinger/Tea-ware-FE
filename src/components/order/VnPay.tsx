@@ -15,15 +15,12 @@ const VnPay: React.FC = () => {
   const handleVNPay = async () => {
     const OrderPaid = {
       ...orderInfo,
-      status: "pending", // Corrected spelling from "pendding" to "pending"
+      status: "pending",
       paymentMethod: "payOnline",
     };
 
     try {
-      const { data } = await axiosInstance.post(
-        "/payment",
-        OrderPaid
-      );
+      const { data } = await axiosInstance.post("/payment", OrderPaid);
 
       if (data.code === "00") {
         document.location.href = data.data;
