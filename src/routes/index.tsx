@@ -54,7 +54,6 @@ const router = createBrowserRouter([
           </PublicRoute>
         ),
       },
-      { path: "products/:category", element: <ProductListingPage /> },
       { path: "forgot-password", element: <ForgotPassword /> },
       { path: "orderSuccess", element: <VnPaySuccess /> },
       {
