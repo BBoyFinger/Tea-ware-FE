@@ -12,6 +12,9 @@ const ProductListingPage = () => {
   const [sortBy, setSortBy] = useState<string>("popularity");
   const [minPrice, setMinPrice] = useState<string>("");
   const [maxPrice, setMaxPrice] = useState<string>("");
+  
+
+  
 
   const dispatch: AppDispatch = useDispatch();
 
@@ -113,7 +116,7 @@ const ProductListingPage = () => {
                   </button>
                 </li>
                 {categories.map((category: ICategory) => (
-                  <li key={category._id} className="mb-2">
+                  <li key={category?._id} className="mb-2">
                     <button
                       className={`w-full text-left py-2 px-4 ${
                         selectedCategory === category.name

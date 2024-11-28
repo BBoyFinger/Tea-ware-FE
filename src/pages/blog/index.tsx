@@ -78,9 +78,10 @@ const BlogPage = () => {
               />
               <div className="p-6">
                 <h2 className="text-2xl font-bold mb-2">{blog.title}</h2>
-                <p className="text-gray-600 mb-4">
-                  {blog.content?.substring(0, 100)}
-                </p>
+                <p
+                  className="text-gray-600 mb-4"
+                  dangerouslySetInnerHTML={{__html: blog.content?.substring(0, 100)}}
+                ></p>
                 <div className="flex justify-between items-center mb-4">
                   <span className="text-sm text-gray-500">
                     {moment(blog.createdAt).format("MMM Do YY")}

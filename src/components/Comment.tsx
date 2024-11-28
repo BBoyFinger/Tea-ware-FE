@@ -223,7 +223,7 @@ const Comments: React.FC<CommentsProps> = ({ productId }) => {
                       >
                         Reply
                       </button>
-                      {(user?._id === comment.user._id ||
+                      {(user?._id === comment.user?._id ||
                         user?.role === "admin") && (
                         <button
                           onClick={() => handleDelete(comment._id)}

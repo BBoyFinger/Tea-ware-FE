@@ -9,7 +9,7 @@ import {
 import { BsStarFill, BsStarHalf, BsStar } from "react-icons/bs";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../../store/store";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import {
   getProductByCategory,
   getProductById,
@@ -18,7 +18,7 @@ import RelatedProducts from "../../components/RelatedProduct";
 import Context from "../../context";
 import { addCart, viewProductCart } from "../../features/auth/authSlice";
 import Comments from "../../components/Comment";
-import CommentSection from "../../components/CommentSession";
+
 
 const ProductDetailPage = () => {
   const context = useContext(Context);
@@ -30,19 +30,16 @@ const ProductDetailPage = () => {
   const { product, productByCategory } = productState;
 
   const params = useParams();
+  const navigate = useNavigate();
 
   useEffect(() => {
     dispatch(getProductByCategory("Best Sellers"));
-    if (params.id) {
-      dispatch(getProductById(params.id));
+    if (params?.id) {
+      dispatch(getProductById(params?.id));
     }
   }, [params.id, dispatch]);
 
-  const handleAddToCart = async (productId: string) => {
-    await dispatch(addCart(productId));
-    context?.fetchUserAddToCart();
-    await dispatch(viewProductCart());
-  };
+ 
 
   const renderStars = (rating: any) => {
     const stars = [];
@@ -59,6 +56,20 @@ const ProductDetailPage = () => {
   };
 
   const pageUrl = "https://developers.facebook.com/docs/plugins/";
+
+  const handleAddToCart = async (productId: string) => {
+    await dispatch(addCart(productId));
+    context?.fetchUserAddToCart();
+    await dispatch(viewProductCart());
+  };
+
+  const handleCheckout = async (productId: string) => {
+    console.log(productId);
+    await dispatch(addCart(productId));
+    context?.fetchUserAddToCart();
+    await dispatch(viewProductCart());
+    navigate("/checkout")
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -120,7 +131,9 @@ const ProductDetailPage = () => {
           </div>
 
           <div className="flex items-center gap-3">
-            <button className="border-2 border-[#f05338] text-black min-w-[120px] hover:text-white py-1 px-3 rounded hover:bg-[#f04138] transition-colors duration-300">
+            <button 
+            onClick={() => handleCheckout(product?._id || "")}
+            className="border-2 border-[#f05338] text-black min-w-[120px] hover:text-white py-1 px-3 rounded hover:bg-[#f04138] transition-colors duration-300">
               Buy
             </button>
             <button
