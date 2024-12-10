@@ -42,6 +42,7 @@ const Comments: React.FC<CommentsProps> = ({ productId }) => {
   const [newComment, setNewComment] = useState<string>("");
   const [reply, setReply] = useState<Record<string, string>>({});
   const [error, setError] = useState<string>("");
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [successMessage, setSuccessMessage] = useState<string>("");
 
   const [replyTo, setReplyTo] = useState<string | null>(null);

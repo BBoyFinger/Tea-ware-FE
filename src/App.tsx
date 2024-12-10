@@ -14,6 +14,7 @@ import {
   viewProductCart,
 } from "./features/auth/authSlice";
 import { AppDispatch, RootState } from "./store/store";
+import ChatComponent from "./components/Chat";
 
 function App() {
   const dispatch: AppDispatch = useDispatch();
@@ -72,6 +73,8 @@ function App() {
         <main className="bg-white">
           <Outlet />
         </main>
+        {user && user.role !== "ADMIN" ? <ChatComponent /> : null}
+
         <Footer />
       </Context.Provider>
     </>

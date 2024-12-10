@@ -14,6 +14,7 @@ import { Link, useLocation } from "react-router-dom";
 import { RiBloggerLine } from "react-icons/ri";
 import { useSelector } from "react-redux";
 import { RootState } from "../../store/store";
+import { GiConversation } from "react-icons/gi";
 
 const AdminPanel = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -121,6 +122,20 @@ const AdminPanel = () => {
               >
                 <FiShoppingCart />
                 <span>Order</span>
+              </Link>
+            </li>
+
+            <li>
+              <Link
+                to="/admin-panel/conversations" // Cập nhật đường dẫn
+                className={`flex items-center space-x-2 w-full p-2 rounded-md ${
+                  isActiveTab("/admin-panel/conversations")
+                    ? "bg-gray-700"
+                    : "hover:bg-gray-700"
+                }`}
+              >
+                <GiConversation />
+                <span>Conversation</span>
               </Link>
             </li>
 

@@ -25,6 +25,7 @@ import Settings from "../pages/admin/Setting";
 import VnPaySuccess from "../components/order/VnPaySuccess";
 import MyOrder from "../pages/myOrder";
 import MyProfile from "../pages/profile";
+import AdminConversation from "../pages/admin/Conversations";
 
 const PrivateRoute = ({ children }: { children: JSX.Element }) => {
   const { user } = useSelector((state: RootState) => state.authReducer);
@@ -81,6 +82,7 @@ const router = createBrowserRouter([
           { path: "products", element: <ProductManagement /> },
           { path: "blogs", element: <BlogManagement /> },
           { path: "orders", element: <OrderManagement /> },
+          { path: "conversations", element: <AdminConversation /> },
           { path: "setting", element: <Settings /> },
         ],
       },
