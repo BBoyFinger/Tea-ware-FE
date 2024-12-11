@@ -37,27 +37,54 @@ const ProductsList: React.FC<{ products: IProduct[] }> = ({ products }) => {
               <h3 className="text-base capitalize font-medium mb-1">
                 {product.productName}
               </h3>
-              {product.discount && (
-                <div className="flex justify-between">
-                  <p className="text-[#a66920] mb-2 font-semibold text-sm">
-                    Sale: $
-                    {product.price &&
-                      product.price - product.price * (product.discount / 100)}
+              {product.discount !== 0 && product.discount ? (
+                <>
+                  <div className="flex justify-between items-center mb-1">
+                    <p className="text-[#a66920]  font-semibold text-sm">
+                      Sale: $
+                      {product.price &&
+                        product.price -
+                          product.price * (product.discount / 100)}
+                    </p>
+                    <div>
+                      {product.availability === "In Stock" ? (
+                        <div className="text-[#3c9342] text-sm">
+                          {product.availability}
+                        </div>
+                      ) : (
+                        <div className="text-red-500 text-sm">
+                          {product.availability}
+                        </div>
+                      )}
+                    </div>
+                    {/* <div className="flex items-center mb-2">
+                      <p className="text-sm text-gray-500 font-medium">
+                        Rating: {product.averageRating} / 5
+                      </p>
+                      <p className="ml-2 text-sm text-gray-500 font-medium">
+                        ({product.reviewsCount} reviews)
+                      </p>
+                    </div> */}
+                  </div>
+                </>
+              ) : null}
+              {!product.discount && (
+                <div className="flex justify-between items-center mb-1">
+                  <p className="text-[#a66920] font-semibold text-sm">
+                    only ${product.price}
                   </p>
-                  <div className="flex items-center mb-2">
-                    <p className="text-sm text-gray-500 font-medium">
-                      Rating: {product.averageRating} / 5
-                    </p>
-                    <p className="ml-2 text-sm text-gray-500 font-medium">
-                      ({product.reviewsCount} reviews)
-                    </p>
+                  <div>
+                    {product.availability === "In Stock" ? (
+                      <div className="text-[#3c9342] text-sm">
+                        {product.availability}
+                      </div>
+                    ) : (
+                      <div className="text-red-500 text-sm">
+                        {product.availability}
+                      </div>
+                    )}
                   </div>
                 </div>
-              )}
-              {!product.discount && (
-                <p className="text-[#a66920] mb-2 font-semibold text-sm">
-                  only ${product.price}
-                </p>
               )}
             </Link>
 

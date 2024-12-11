@@ -15,11 +15,16 @@ import {
 } from "./features/auth/authSlice";
 import { AppDispatch, RootState } from "./store/store";
 import ChatComponent from "./components/Chat";
+import { FaArrowUp } from "react-icons/fa";
 
 function App() {
   const dispatch: AppDispatch = useDispatch();
   const authState = useSelector((state: RootState) => state.authReducer);
   const { userAddToCartCount, user } = authState;
+
+  const handleScrooltoTop = () => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
   const fetchUserDetails = async (): Promise<void> => {
     try {
@@ -74,7 +79,14 @@ function App() {
           <Outlet />
         </main>
         {user && user.role !== "ADMIN" ? <ChatComponent /> : null}
-
+        <div className="fixed ">
+          <button
+            onClick={handleScrooltoTop}
+            className="fixed bottom-[10%] right-[1%] bg-blue-500 text-white rounded-full p-4 shadow-lg hover:bg-blue-600 transition-colors duration-200"
+          >
+            <FaArrowUp className="w-6 h-6" />
+          </button>
+        </div>
         <Footer />
       </Context.Provider>
     </>

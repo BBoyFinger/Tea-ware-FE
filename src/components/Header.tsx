@@ -1,4 +1,4 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { AppDispatch, RootState } from "../store/store";
 import { setUserDetails, viewProductCart } from "../features/auth/authSlice";
@@ -42,8 +42,34 @@ const Header = () => {
     context?.fetchUserAddToCart();
   }, [dispatch]);
 
+  const [isTop, setIsTop] = useState(true);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      // Kiểm tra vị trí của trang
+      if (window.scrollY === 0) {
+        setIsTop(true); // Ở top
+      } else {
+        setIsTop(false); // Không ở top
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+
+    // Cleanup khi component unmount
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
+
   return (
-    <header className="shadow-2xl bg-[#db8f32]">
+    <header
+      className={`${
+        isTop
+          ? "shadow-2xl bg-[#db8f32]"
+          : "shadow-2xl bg-[#db8f32] fixed z-50 w-full"
+      }`}
+    >
       <div className="container h-full text-white">
         {/* Mobile */}
         <div className="lg:hidden pt-1 pb-3">

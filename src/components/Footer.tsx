@@ -61,7 +61,7 @@ const links = [
       { name: "Stores", href: "#" },
       { name: "Media / Press", href: "#" },
       { name: "Wholesale", href: "#" },
-      { name: "Help / Contact", href: "#" },
+      { name: "Help / Contact", href: "/help" },
     ],
   },
   {

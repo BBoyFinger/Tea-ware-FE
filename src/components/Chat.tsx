@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { RootState } from "../store/store";
 import axiosInstance from "../utils/axiosConfig";
 
+// const ENDPOINT = "http://localhost:8080";
 const ENDPOINT = "https://tea-ceremony-be-zhiv.onrender.com";
 let socket: any;
 
@@ -16,18 +17,18 @@ const ChatComponent = () => {
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
   const { user } = useSelector((state: RootState) => state.authReducer);
 
-  useEffect(() => {
-    const fetchMessages = async () => {
-      try {
-        const { data } = await axiosInstance.get(
-          `/chats/message?idUser=${user?._id}`
-        );
-        setMessages(data.messageList);
-      } catch (error) {
-        console.error("Error fetching messages:", error);
-      }
-    };
+  const fetchMessages = async () => {
+    try {
+      const { data } = await axiosInstance.get(
+        `/chats/message?idUser=${user?._id}`
+      );
+      setMessages(data.messageList);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+    }
+  };
 
+  useEffect(() => {
     fetchMessages();
   }, [user?._id]);
 
@@ -71,6 +72,7 @@ const ChatComponent = () => {
         const { data } = await axiosInstance.post(`/chats/save`, payload);
         socket.emit("chat", data);
       });
+      fetchMessages(); // Fetch messages after sending
     } else {
       const idConversation =
         messages[0].idConversation._id || messages[0].idConversation;
@@ -81,6 +83,7 @@ const ChatComponent = () => {
       };
       const { data } = await axiosInstance.post(`chats/save`, payload);
       socket.emit("chat", data);
+      fetchMessages(); // Fetch messages after sending
     }
 
     setNewMessage("");
@@ -97,10 +100,10 @@ const ChatComponent = () => {
       </button>
 
       {isChatOpen && (
-        <div className="fixed bottom-16 right-4 flex flex-col h-96 w-80 bg-gray-100 shadow-xl rounded-lg overflow-hidden">
+        <div className="fixed bottom-16 right-4 flex flex-col h-96 w-80 bg-gray-100 shadow-xl rounded-lg overflow-hidden z-50">
           <div className="bg-white shadow-md p-4">
             <h2 className="text-xl font-semibold text-gray-800">
-              Chat {user?.name}
+              Hi {user?.name}!
             </h2>
           </div>
 
@@ -113,9 +116,13 @@ const ChatComponent = () => {
                 }`}
               >
                 <div className="flex items-end space-x-2">
+                  {/* Customer */}
                   {message.sender !== "ADMIN" && (
                     <img
-                      src={message?.idConversation?.idUser?.pictureImg}
+                      src={
+                        message?.idConversation?.idUser?.pictureImg ||
+                        "https://images.unsplash.com/photo-1494790108377-be9c29b29330"
+                      }
                       alt="avatar"
                       className="w-8 h-8 rounded-full object-cover"
                       onError={(e) => {
@@ -124,6 +131,8 @@ const ChatComponent = () => {
                       }}
                     />
                   )}
+
+                  {/* Admin */}
                   <div
                     className={`max-w-xs ${
                       message.sender === "ADMIN"
@@ -133,12 +142,17 @@ const ChatComponent = () => {
                   >
                     <p className="text-sm">{message.message}</p>
                     <p className="text-xs mt-1 opacity-75">
-                      {new Date(message.createdAt).toLocaleString()}
+                      {message.createdAt
+                        ? new Date(message.createdAt).toLocaleString()
+                        : "Date not available"}
                     </p>
                   </div>
                   {message.sender === "ADMIN" && (
                     <img
-                      src={message?.idConversation?.idUser?.pictureImg}
+                      src={
+                        message?.idConversation?.idUser?.pictureImg ||
+                        "https://images.unsplash.com/photo-1494790108377-be9c29b29330"
+                      }
                       alt="avatar"
                       className="w-8 h-8 rounded-full object-cover"
                       onError={(e) => {

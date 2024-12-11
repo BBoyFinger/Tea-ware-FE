@@ -1,9 +1,14 @@
 /* eslint-disable jsx-a11y/heading-has-content */
 
 import { IProduct } from "../types/product.types";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { LuShoppingCart } from "react-icons/lu";
 import scrollTop from "../utils/scrollTop";
+import { AppDispatch } from "../store/store";
+import { useDispatch } from "react-redux";
+import { addCart, viewProductCart } from "../features/auth/authSlice";
+import { useContext } from "react";
+import Context from "../context";
 
 type Props = {
   title: String;
@@ -18,6 +23,17 @@ const SpecialProduct = ({
   isLoading,
   handleAddToCart,
 }: Props) => {
+  const context = useContext(Context);
+  const dispatch: AppDispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const handleCheckout = async (productId: string) => {
+    console.log(productId);
+    await dispatch(addCart(productId));
+    context?.fetchUserAddToCart();
+    await dispatch(viewProductCart());
+    navigate("/checkout");
+  };
   return (
     <section className="bg-white ">
       <div className="container mx-auto px-4">
@@ -61,7 +77,7 @@ const SpecialProduct = ({
                 </>
               ))
             : products.map((product) => (
-                <div className="relative transition-transform duration-300 transform hover:scale-105 cursor-pointer">
+                <div className="relative group transition-transform  duration-300 transform hover:scale-105 cursor-pointer shadow-xl p-2">
                   <div className="absolute top-4 right-4 p-2 bg-slate-100 rounded-full cursor-pointer z-50">
                     <LuShoppingCart
                       className="w-5 h-5"
@@ -76,11 +92,11 @@ const SpecialProduct = ({
                     <img
                       src={product.images && product.images[0]?.url}
                       alt={product.images && product.images[0]?.title}
-                      className="w-[full] h-auto object-contain mb-2"
+                      className="w-[400px] h-[200px] object-contain mb-2"
                     />
                     <h2 className="capitalize">{product.productName}</h2>
 
-                    <div className="flex items-center justify-between">
+                    <div className="flex  items-center justify-between">
                       <div className="flex items-center justify-between">
                         <p className="text-[#a66920] font-semibold text-sm">
                           {product.discount && product.discount > 0 ? (
@@ -97,16 +113,36 @@ const SpecialProduct = ({
                           )}
                         </p>
                       </div>
-                      <div className="flex items-center">
+                      <div>
+                        {product.availability === "In Stock" ? (
+                          <div className="text-[#3c9342]">
+                            {product.availability}
+                          </div>
+                        ) : (
+                          <div className="text-red-500">
+                            {product.availability}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* <div className="flex items-center">
                         <p className="text-sm text-gray-500 font-medium">
                           Rating: {product.averageRating} / 5
                         </p>
                         <p className="ml-2 text-sm text-gray-500 font-medium">
                           ({product.reviewsCount} reviews)
                         </p>
-                      </div>
+                      </div> */}
                     </div>
                   </Link>
+                  <div className="hidden group-hover:flex">
+                    <button
+                      onClick={() => handleCheckout(product?._id || "")}
+                      className="bg-[#f04138] text-white px-4 py-2 rounded-md hover:bg-[#f04138] transition-colors w-full"
+                    >
+                      Check out
+                    </button>
+                  </div>
                 </div>
               ))}
         </div>
