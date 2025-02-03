@@ -58,6 +58,7 @@ const AboutUs = () => {
         </section>
 
         <section id="mission" className="mb-12">
+          
           <h2 className="text-3xl font-bold mb-4">Our Mission</h2>
           <div className="bg-white p-6 rounded-lg shadow-md">
             <p className="text-lg mb-4">

@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   // baseURL: 'http://localhost:8080', 
-  baseURL: 'https://tea-ceremony-be-zhiv.onrender.com/',
+  baseURL: 'https://tea-ceremony-be-i86j.onrender.com/',
   withCredentials: true, // Allow cookies to be sent with requests
 });
 
